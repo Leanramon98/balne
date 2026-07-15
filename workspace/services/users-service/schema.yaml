@@ -1,0 +1,199 @@
+name: users-service
+module_path: users-service
+
+# Custom DTOs for endpoints
+entities:
+  - name: LoginRequest
+    fields:
+      - name: Email
+        type: string
+      - name: Password
+        type: string
+
+  - name: LoginResponse
+    fields:
+      - name: Token
+        type: string
+      - name: User
+        type: uuid
+        references: User
+      - name: Role
+        type: string
+      - name: DestinationID
+        type: uuid
+        nullable: true
+      - name: Permissions
+        type: json
+
+  - name: RegisterRequest
+    fields:
+      - name: Email
+        type: string
+      - name: Password
+        type: string
+      - name: FullName
+        type: string
+
+  - name: HealthResponse
+    fields:
+      - name: Status
+        type: string
+
+  - name: RootResponse
+    fields:
+      - name: Message
+        type: string
+
+  # Password recovery DTOs
+  - name: ForgotPasswordRequest
+    fields:
+      - name: Email
+        type: string
+
+  - name: ForgotPasswordResponse
+    fields:
+      - name: Message
+        type: string
+
+  - name: ResetPasswordRequest
+    fields:
+      - name: Token
+        type: string
+      - name: Password
+        type: string
+
+  - name: ResetPasswordResponse
+    fields:
+      - name: Message
+        type: string
+
+  # Own entities
+  - name: UserProfile
+    fields:
+      - name: ID
+        type: uuid
+        primary: true
+      - name: UserID
+        type: uuid
+        references: User
+      - name: AvatarURL
+        type: string
+      - name: Bio
+        type: text
+      - name: Preferences
+        type: json
+
+endpoints:
+  # Auth
+  - method: POST
+    path: /auth/login
+    request_entity: LoginRequest
+    response_entity: LoginResponse
+    roles: []
+    public: true
+
+  - method: POST
+    path: /auth/register
+    request_entity: RegisterRequest
+    response_entity: User
+    roles: []
+    public: true
+
+  - method: POST
+    path: /auth/forgot-password
+    request_entity: ForgotPasswordRequest
+    response_entity: ForgotPasswordResponse
+    roles: []
+    public: true
+
+  - method: POST
+    path: /auth/reset-password
+    request_entity: ResetPasswordRequest
+    response_entity: ResetPasswordResponse
+    roles: []
+    public: true
+
+  # Users CRUD
+  - method: GET
+    path: /users
+    response_entity: User
+    response_is_list: true
+    roles: [admin]
+
+  - method: GET
+    path: /users/{id}
+    response_entity: User
+    roles: [admin]
+
+  - method: POST
+    path: /users
+    request_entity: User
+    response_entity: User
+    roles: [admin]
+
+  - method: PUT
+    path: /users/{id}
+    request_entity: User
+    response_entity: User
+    roles: [admin]
+
+  - method: DELETE
+    path: /users/{id}
+    roles: [admin]
+
+  # User profile (self) — all authenticated users
+  - method: GET
+    path: /profile
+    response_entity: User
+    roles: [admin, admin_destino, gestor_destino, consultor, auditor, gestor_regional, gestor_nacional]
+
+  - method: PUT
+    path: /profile
+    request_entity: UserProfile
+    response_entity: UserProfile
+    roles: [admin, admin_destino, gestor_destino, consultor, auditor, gestor_regional, gestor_nacional]
+
+  # Roles
+  - method: GET
+    path: /roles
+    response_entity: Role
+    response_is_list: true
+    roles: [admin]
+
+  - method: POST
+    path: /roles
+    request_entity: Role
+    response_entity: Role
+    roles: [admin]
+
+  # Audit Logs
+  - method: GET
+    path: /audit-logs
+    response_entity: AuditLog
+    response_is_list: true
+    roles: [admin]
+
+events:
+  - name: UserCreated
+    entity: User
+  - name: UserUpdated
+    entity: User
+  - name: UserDeleted
+    entity: User
+
+rbac:
+  roles:
+    - name: admin
+      description: Super admin — full access
+    - name: admin_destino
+      description: Destination admin
+    - name: gestor_destino
+      description: Destination manager
+    - name: consultor
+      description: External consultant
+    - name: auditor
+      description: External auditor
+    - name: gestor_regional
+      description: Regional manager
+    - name: gestor_nacional
+      description: National manager

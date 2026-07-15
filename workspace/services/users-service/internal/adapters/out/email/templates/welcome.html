@@ -1,0 +1,121 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light">
+  <meta name="supported-color-schemes" content="light">
+  <title>Bienvenido a Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI</title>
+</head>
+<body style="margin:0; padding:0; background-color:#040927; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased;">
+
+  <!-- Preheader -->
+  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; font-size:1px; line-height:1px;">
+    Tu cuenta en la Red Iberoamericana DTI ya está lista. Ingresá con tus credenciales y comenzá.
+  </div>
+
+  <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#040927;">
+    <tr>
+      <td align="center" style="padding:0;">
+
+        <!-- HERO -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#040927; background-image:radial-gradient(circle at 20% 0%, #131c52 0%, rgba(19,28,82,0) 42%), radial-gradient(circle at 92% 30%, #1a2566 0%, rgba(26,37,102,0) 40%);">
+          <tr>
+            <td align="center" style="padding:52px 24px 108px;">
+
+              <!-- Logo -->
+              <img src="https://evaluacionesdti.rediberoamericanadti.org/dti-logo.png" width="300" alt="Red Iberoamericana DTI" style="display:block; width:300px; max-width:80%; height:auto; margin:0 auto 24px;">
+
+              <h1 style="color:#ffffff; font-size:28px; font-weight:800; letter-spacing:-0.6px; line-height:1.25; margin:0;">
+                Bienvenidos a la Plataforma de Autodiagnóstico
+              </h1>
+              <p style="color:rgba(167,173,216,0.85); font-size:15px; line-height:1.6; margin:12px auto 0; max-width:420px;">
+                Red Iberoamericana de Destinos Turísticos Inteligentes.
+              </p>
+
+            </td>
+          </tr>
+        </table>
+
+        <!-- CARD (overlapping) -->
+        <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef0f4;">
+          <tr>
+            <td align="center" style="padding:0 16px 40px;">
+
+              <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px; background-color:#ffffff; border-radius:18px; box-shadow:0 12px 40px rgba(4,9,39,0.28); margin-top:-72px;">
+                <tr>
+                  <td style="padding:38px 40px 12px;">
+
+                    <p style="color:#040927; font-size:16px; line-height:1.65; margin:0 0 6px; font-weight:600;">
+                      Hola {{.FullName}},
+                    </p>
+                    <p style="color:#52556a; font-size:14.5px; line-height:1.65; margin:0 0 26px;">
+                      Se creó una cuenta para vos en la <strong style="color:#040927;">Red Iberoamericana DTI</strong>. Usá estas credenciales para tu primer acceso.
+                    </p>
+
+                    <!-- Email card -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 12px;">
+                      <tr>
+                        <td style="background-color:#f6f7f9; border:1px solid #e5e7ee; border-radius:12px; padding:16px 20px;">
+                          <p style="margin:0 0 4px; color:#9297ad; font-size:11px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;">Email</p>
+                          <p style="margin:0; color:#040927; font-size:15px; font-weight:600; word-break:break-all;">{{.Email}}</p>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- Password card -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 4px;">
+                      <tr>
+                        <td style="background-color:#f6f7f9; border:1px solid #e5e7ee; border-radius:12px; padding:16px 20px;">
+                          <p style="margin:0 0 8px; color:#9297ad; font-size:11px; font-weight:700; letter-spacing:0.6px; text-transform:uppercase;">Contraseña</p>
+                          <span style="display:inline-block; background-color:#ffffff; border:1px solid #dfe2ec; border-radius:8px; padding:9px 16px; color:#040927; font-size:16px; font-weight:600; font-family:'SFMono-Regular','Consolas','Courier New',monospace; letter-spacing:1px;">{{.Password}}</span>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <!-- CTA -->
+                    <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:28px 0 6px;">
+                      <tr>
+                        <td align="center" style="border-radius:11px; background-color:#040927;">
+                          <a href="{{.LoginURL}}" style="display:block; color:#ffffff; font-size:15px; font-weight:700; text-decoration:none; padding:15px 32px; border-radius:11px;">
+                            Iniciar sesión &nbsp;→
+                          </a>
+                        </td>
+                      </tr>
+                    </table>
+
+                    <p style="color:#040927; font-size:13px; line-height:1.6; margin:20px 0 0; padding:14px 16px; background-color:#fbf7ec; border:1px solid #efe3c4; border-radius:10px;">
+                      <span style="color:#a8842a; font-weight:700;">Importante:</span> <span style="color:#6b5f42;">por seguridad, cambiá tu contraseña la primera vez que inicies sesión.</span>
+                    </p>
+
+                    <p style="color:#9297ad; font-size:12px; line-height:1.6; margin:22px 0 0; text-align:center; border-top:1px solid #eceef3; padding-top:22px;">
+                      Si no solicitaste esta cuenta, ignorá este mensaje.
+                    </p>
+
+                  </td>
+                </tr>
+              </table>
+
+              <!-- Footer -->
+              <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px;">
+                <tr>
+                  <td style="padding:26px 24px 0; text-align:center;">
+                    <p style="color:#6d7290; font-size:12px; font-weight:700; margin:0 0 3px;">Red Iberoamericana DTI</p>
+                    <p style="color:#9297ad; font-size:11px; line-height:1.6; margin:0;">
+                      Plataforma de Autodiagnóstico de Destinos Turísticos Inteligentes<br>
+                      Mensaje automático · No respondas a este correo · © 2026
+                    </p>
+                  </td>
+                </tr>
+              </table>
+
+            </td>
+          </tr>
+        </table>
+
+      </td>
+    </tr>
+  </table>
+
+</body>
+</html>

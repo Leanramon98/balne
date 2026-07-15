@@ -1,0 +1,9 @@
+node_modules
+.next
+.git
+*.md
+.env.local
+.env.development
+.env.production
+tsconfig.tsbuildinfo
+next-env.d.ts

@@ -1,0 +1,541 @@
+'use client';
+
+import React, { useState } from 'react';
+import useSWR from 'swr';
+import { getDestinations } from '@/sdk/api/evaluations-api';
+import { getRoles } from '@/sdk/api/users-api';
+import { useAuthHeaders } from '@/sdk/hooks/useAuthHeaders';
+import { Button } from '@/components/ui/button';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Skeleton } from '@/components/ui/skeleton';
+import {
+  Table, TableBody, TableCell, TableHead, TableHeader, TableRow,
+} from '@/components/ui/table';
+import {
+  Select, SelectContent, SelectItem, SelectTrigger, SelectValue,
+} from '@/components/ui/select';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger,
+} from '@/components/ui/dialog';
+import { Switch } from '@/components/ui/switch';
+import { Checkbox } from '@/components/ui/checkbox';
+import {
+  Plus, Edit, Trash2, Save,
+  Eye, KeyRound, CheckSquare, XSquare, Mail,
+} from 'lucide-react';
+
+// ========== Users Tab (F2-06, F2-07) ==========
+export default function UsersTab() {
+  const getAuthHeaders = useAuthHeaders();
+
+  const { data: users, isLoading, mutate } = useSWR('users-config', () => {
+    const headers = getAuthHeaders();
+    return fetch('/api/users/users', { headers }).then(r => {
+      if (!r.ok) throw new Error('Failed to fetch users');
+      return r.json();
+    }).then(d => {
+      const list = d?.Items || d?.items || d;
+      return Array.isArray(list) ? list : [];
+    });
+  });
+
+  // Load destinations to resolve destination_id → name in the table
+  const { data: dests } = useSWR('users-config-destinations', () => getDestinations());
+  const destMap = new Map(
+    (Array.isArray(dests) ? dests : []).map((d: any) => [d.id, d.name])
+  );
+
+  // Load roles to resolve role_id → name in the table
+  const { data: roleList } = useSWR('users-config-roles', () => getRoles());
+  const roleMap = new Map(
+    (Array.isArray(roleList) ? roleList : []).map((r: any) => [r.ID, r.Name])
+  );
+
+  const [userDialogOpen, setUserDialogOpen] = useState(false);
+  const [editingUser, setEditingUser] = useState<any>(null);
+  const [detailUser, setDetailUser] = useState<any>(null);
+  const [selectedIds, setSelectedIds] = useState<Set<string>>(new Set());
+
+  const allIds = (users || []).map((u: any) => String(u.ID || u.id));
+  const allSelected = allIds.length > 0 && selectedIds.size === allIds.length;
+  const someSelected = selectedIds.size > 0;
+
+  const toggleSelectAll = () => {
+    if (allSelected) {
+      setSelectedIds(new Set());
+    } else {
+      setSelectedIds(new Set(allIds));
+    }
+  };
+
+  const toggleSelect = (id: string) => {
+    const next = new Set(selectedIds);
+    if (next.has(id)) next.delete(id); else next.add(id);
+    setSelectedIds(next);
+  };
+
+  const handleBulkActivate = async () => {
+    if (!window.confirm(`¿Activar ${selectedIds.size} usuario(s)?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      const userMap = new Map((users || []).map((u: any) => [String(u.ID || u.id), u]));
+      await Promise.all(
+        Array.from(selectedIds).map(id => {
+          const u = userMap.get(id);
+          if (!u) return Promise.resolve();
+          return fetch(`/api/users/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              full_name: u.full_name || u.FullName || u.fullName,
+              email: u.email || u.Email,
+              role_id: u.role_id || u.RoleID || u.roleId,
+              is_active: true,
+              ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
+            }),
+          });
+        })
+      );
+      setSelectedIds(new Set());
+      mutate();
+    } catch { alert('Error al activar usuarios'); }
+  };
+
+  const handleBulkDeactivate = async () => {
+    if (!window.confirm(`¿Desactivar ${selectedIds.size} usuario(s)?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      const userMap = new Map((users || []).map((u: any) => [String(u.ID || u.id), u]));
+      await Promise.all(
+        Array.from(selectedIds).map(id => {
+          const u = userMap.get(id);
+          if (!u) return Promise.resolve();
+          return fetch(`/api/users/users/${id}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json', ...headers },
+            body: JSON.stringify({
+              full_name: u.full_name || u.FullName || u.fullName,
+              email: u.email || u.Email,
+              role_id: u.role_id || u.RoleID || u.roleId,
+              is_active: false,
+              ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
+            }),
+          });
+        })
+      );
+      setSelectedIds(new Set());
+      mutate();
+    } catch { alert('Error al desactivar usuarios'); }
+  };
+
+  const handleBulkDelete = async () => {
+    if (!window.confirm(`¿Eliminar ${selectedIds.size} usuario(s)? Esta acción no se puede deshacer.`)) return;
+    try {
+      const headers = getAuthHeaders();
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          fetch(`/api/users/users/${id}`, { method: 'DELETE', headers })
+        )
+      );
+      setSelectedIds(new Set());
+      mutate();
+    } catch { alert('Error al eliminar usuarios'); }
+  };
+
+  const handleBulkResendWelcome = async () => {
+    if (!window.confirm(`¿Reenviar correo de bienvenida a ${selectedIds.size} usuario(s)? Se generará una nueva contraseña para cada uno.`)) return;
+    try {
+      const headers = getAuthHeaders();
+      await Promise.all(
+        Array.from(selectedIds).map(id =>
+          fetch(`/api/users/users/${id}/restore-password`, { method: 'POST', headers })
+        )
+      );
+      setSelectedIds(new Set());
+      alert(`Correo de bienvenida reenviado a ${selectedIds.size} usuario(s).`);
+    } catch { alert('Error al reenviar correos'); }
+  };
+
+  const openCreate = () => {
+    setEditingUser(null);
+    setUserDialogOpen(true);
+  };
+
+  const openEdit = (u: any) => {
+    setEditingUser(u);
+    setUserDialogOpen(true);
+  };
+
+  const handleToggleActive = async (u: any) => {
+    const id = u.ID || u.id;
+    const isActive = !(u.IsActive ?? u.is_active ?? true);
+    const name = u.full_name || u.FullName || u.fullName || u.email || u.Email || 'usuario';
+    const action = isActive ? 'activar' : 'desactivar';
+    if (!window.confirm(`¿${action} al usuario "${name}"?`)) return;
+    try {
+      const headers = getAuthHeaders();
+      // PUT with all fields — the backend skips password_hash when empty
+      await fetch(`/api/users/users/${id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json', ...headers },
+        body: JSON.stringify({
+          full_name: u.full_name || u.FullName || u.fullName,
+          email: u.email || u.Email,
+          role_id: u.role_id || u.RoleID || u.roleId,
+          is_active: isActive,
+          ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
+        }),
+      });
+      mutate();
+    } catch (err) {
+      alert('Error al cambiar estado');
+    }
+  };
+
+  const handleRestorePassword = async (u: any) => {
+    const id = u.ID || u.id;
+    const name = u.full_name || u.FullName || u.fullName || u.email || u.Email || 'usuario';
+    if (!window.confirm(`¿Reenviar correo de bienvenida a "${name}"? Se generará una nueva contraseña.`)) return;
+    try {
+      const headers = getAuthHeaders();
+      await fetch(`/api/users/users/${id}/restore-password`, { method: 'POST', headers });
+      alert(`Contraseña restaurada para ${name}. El usuario recibirá un correo con las instrucciones.`);
+    } catch {
+      alert(`Funcionalidad no disponible: Restaurar contraseña para ${name}. Contactá al administrador del sistema.`);
+    }
+  };
+
+  const handleDeleteUser = async (u: any) => {
+    const id = u.ID || u.id;
+    const name = u.full_name || u.FullName || u.fullName || u.email || u.Email || 'usuario';
+    if (!window.confirm(`¿Eliminar al usuario "${name}"? Esta acción no se puede deshacer.`)) return;
+    try {
+      const headers = getAuthHeaders();
+      await fetch(`/api/users/users/${id}`, { method: 'DELETE', headers });
+      mutate();
+    } catch {
+      alert('Error al eliminar usuario');
+    }
+  };
+
+  /** Format creation date safely */
+  const fmtDate = (u: any): string => {
+    const raw = u.CreatedAt || u.created_at || u.createdAt;
+    if (!raw) return '-';
+    try {
+      return new Date(raw).toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' });
+    } catch { return '-'; }
+  };
+
+  return (
+    <Card>
+      <CardHeader>
+        <div className="flex items-center justify-between">
+          <CardTitle>Usuarios</CardTitle>
+          <Dialog open={userDialogOpen} onOpenChange={setUserDialogOpen}>
+            <DialogTrigger asChild>
+              <Button size="sm" onClick={openCreate}><Plus className="mr-2 h-4 w-4" />Nuevo Usuario</Button>
+            </DialogTrigger>
+            <DialogContent className="max-w-lg max-h-[90vh] overflow-y-auto">
+              <DialogHeader>
+                <DialogTitle>{editingUser ? 'Editar Usuario' : 'Nuevo Usuario'}</DialogTitle>
+              </DialogHeader>
+              <UserForm
+                user={editingUser}
+                destinations={null}
+                onSaved={() => { setUserDialogOpen(false); mutate(); }}
+              />
+            </DialogContent>
+          </Dialog>
+        </div>
+      </CardHeader>
+      <CardContent className="p-0">
+        {/* Bulk actions bar */}
+        {someSelected && (
+          <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100">
+            <span className="text-sm font-medium text-blue-800">
+              {selectedIds.size} seleccionado{selectedIds.size > 1 ? 's' : ''}
+            </span>
+            <div className="flex-1" />
+            <Button size="sm" variant="outline" className="border-green-400 text-green-700 hover:bg-green-50" onClick={handleBulkActivate}>
+              <CheckSquare className="mr-1 h-4 w-4" />Activar
+            </Button>
+            <Button size="sm" variant="outline" className="border-amber-400 text-amber-700 hover:bg-amber-50" onClick={handleBulkDeactivate}>
+              <XSquare className="mr-1 h-4 w-4" />Desactivar
+            </Button>
+            <Button size="sm" variant="outline" className="border-red-400 text-red-700 hover:bg-red-50" onClick={handleBulkDelete}>
+              <Trash2 className="mr-1 h-4 w-4" />Eliminar
+            </Button>
+            <Button size="sm" variant="outline" className="border-blue-400 text-blue-700 hover:bg-blue-50" onClick={handleBulkResendWelcome}>
+              <Mail className="mr-1 h-4 w-4" />Reenviar correo
+            </Button>
+          </div>
+        )}
+        {isLoading ? (
+          <div className="p-4"><Skeleton className="h-48 w-full" /></div>
+        ) : (
+          <div className="overflow-x-auto">
+            <Table>
+              <TableHeader>
+                <TableRow>
+                  <TableHead className="bg-zinc-50 w-10 py-3 px-4 border-b border-zinc-200">
+                    <Checkbox
+                      checked={allSelected}
+                      onCheckedChange={toggleSelectAll}
+                      aria-label="Seleccionar todos"
+                    />
+                  </TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Fecha</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Nombre</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Email</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Perfil</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Destino</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Alta/Baja</TableHead>
+                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Acciones</TableHead>
+                </TableRow>
+              </TableHeader>
+              <TableBody>
+                {users?.map((u: any) => {
+                  const userId = u.ID || u.id;
+                  return (
+                    <TableRow key={userId}>
+                      <TableCell className="w-10">
+                        <Checkbox
+                          checked={selectedIds.has(String(userId))}
+                          onCheckedChange={() => toggleSelect(String(userId))}
+                          aria-label={`Seleccionar ${u.full_name || u.FullName || u.fullName || u.email}`}
+                        />
+                      </TableCell>
+                      <TableCell className="whitespace-nowrap">{fmtDate(u)}</TableCell>
+                      <TableCell className="font-medium">{u.full_name || u.FullName || u.fullName || '-'}</TableCell>
+                      <TableCell className="text-sm">{u.email || u.Email}</TableCell>
+                      <TableCell>
+                        <Badge variant="outline" className="text-xs">
+                          {roleMap.get(u.role_id || u.RoleID || u.roleId) || u.role_id || u.RoleID || u.roleId || '-'}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-sm">{destMap.get(u.destination_id) || u.destination_id || '-'}</TableCell>
+                      <TableCell>
+                        <Switch
+                          checked={u.IsActive !== false && u.is_active !== false}
+                          onCheckedChange={() => handleToggleActive(u)}
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-1">
+                          <Button variant="ghost" size="icon" title="Ver detalle" onClick={() => setDetailUser(detailUser === u ? null : u)}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Editar" onClick={() => openEdit(u)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Reenviar correo de bienvenida" onClick={() => handleRestorePassword(u)}>
+                            <KeyRound className="h-4 w-4" />
+                          </Button>
+                          <Button variant="ghost" size="icon" title="Eliminar" onClick={() => handleDeleteUser(u)}>
+                            <Trash2 className="h-4 w-4 text-red-500" />
+                          </Button>
+                        </div>
+                        {detailUser === u && (
+                          <div className="mt-2 p-3 bg-gray-50 rounded-md text-xs space-y-1">
+                            <p><strong>ID:</strong> {userId}</p>
+                            <p><strong>Teléfono:</strong> {u.phone || u.Phone || u.telefono || u.Telefono || '-'}</p>
+                            <p><strong>Cargo:</strong> {u.position || u.Position || u.cargo || u.Cargo || '-'}</p>
+                            <p><strong>Creado:</strong> {fmtDate(u)}</p>
+                            <p><strong>Actualizado:</strong> {u.updated_at || u.UpdatedAt ? fmtDate({ CreatedAt: u.updated_at || u.UpdatedAt }) : '-'}</p>
+                          </div>
+                        )}
+                      </TableCell>
+                    </TableRow>
+                  );
+                })}
+              </TableBody>
+            </Table>
+          </div>
+        )}
+      </CardContent>
+    </Card>
+  );
+}
+
+// ========== User Form (inline, used by UsersTab) ==========
+
+function generatePassword(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
+  let pwd = '';
+  for (let i = 0; i < 14; i++) {
+    pwd += chars.charAt(Math.floor(Math.random() * chars.length));
+  }
+  return pwd;
+}
+
+function UserForm({ user, destinations, onSaved }: {
+  user: any;
+  destinations: any[] | null;
+  onSaved: () => void;
+}) {
+  const getAuthHeaders = useAuthHeaders();
+  // NOTE: Go backend serializes with snake_case keys (full_name, role_id, destination_id)
+  const [roleId, setRoleId] = useState(user?.role_id || user?.RoleID || user?.roleId || '');
+  const [isActive, setIsActive] = useState(user?.is_active ?? user?.IsActive ?? true);
+  const [fullName, setFullName] = useState(user?.full_name || user?.FullName || user?.fullName || '');
+  const [email, setEmail] = useState(user?.email || user?.Email || '');
+  const [destinationId, setDestinationId] = useState(user?.destination_id || user?.DestinationID || user?.destinationId || '');
+  const [position, setPosition] = useState(user?.position || user?.Position || user?.cargo || user?.Cargo || '');
+  const [phone, setPhone] = useState(user?.phone || user?.Phone || user?.telefono || user?.Telefono || '');
+  const [password, setPassword] = useState(user ? '' : generatePassword());
+  const [saving, setSaving] = useState(false);
+
+  // Load destinations if not provided
+  const { data: dests } = useSWR(
+    destinations ? null : 'user-form-destinations',
+    () => getDestinations(),
+  );
+  const destList = destinations || dests || [];
+
+  // Load roles from API (use role UUID as value, role name as label)
+  const { data: roleList } = useSWR('user-form-roles', () => getRoles());
+  const roles = roleList || [];
+
+  const handleSave = async () => {
+    if (!fullName.trim() || !email.trim()) {
+      alert('Nombre y Email son obligatorios');
+      return;
+    }
+    setSaving(true);
+    try {
+      const headers = getAuthHeaders();
+
+      const body: Record<string, unknown> = {
+        full_name: fullName.trim(),
+        email: email.trim(),
+        role_id: roleId,
+        is_active: isActive,
+        position: position.trim() || undefined,
+        phone: phone.trim() || undefined,
+        destination_id: destinationId || undefined,
+      };
+
+      if (user) {
+        // Edit existing user
+        await fetch(`/api/users/users/${user.id || user.ID}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json', ...headers },
+          body: JSON.stringify(body),
+        });
+      } else {
+        // Create new user
+        body.password = password;
+        console.log('[UsersConfig] POST /api/users/users body:', JSON.stringify(body, null, 2));
+        const res = await fetch('/api/users/users', {
+          method: 'POST',
+          headers,
+          body: JSON.stringify(body),
+        });
+        console.log('[UsersConfig] POST /api/users/users status:', res.status);
+        const resText = await res.text();
+        console.log('[UsersConfig] POST /api/users/users response:', resText);
+        if (!res.ok) {
+          throw new Error(`Server error: ${res.status} - ${resText}`);
+        }
+      }
+      onSaved();
+    } catch (err) {
+      alert('Error al guardar usuario');
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-4 py-4">
+      {/* Perfil (Select) */}
+      <div className="space-y-2">
+        <Label>Perfil</Label>
+        <Select value={roleId} onValueChange={setRoleId}>
+          <SelectTrigger><SelectValue placeholder="Seleccionar perfil" /></SelectTrigger>
+          <SelectContent>
+            {roles.map((r: any) => (
+              <SelectItem key={r.ID} value={r.ID}>{r.Name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Estado */}
+      <div className="space-y-2">
+        <Label>Estado</Label>
+        <Select value={isActive ? 'alta' : 'baja'} onValueChange={(v) => setIsActive(v === 'alta')}>
+          <SelectTrigger><SelectValue /></SelectTrigger>
+          <SelectContent>
+            <SelectItem value="alta">Alta</SelectItem>
+            <SelectItem value="baja">Baja</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Nombre */}
+      <div className="space-y-2">
+        <Label>Nombre *</Label>
+        <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" />
+      </div>
+
+      {/* Email */}
+      <div className="space-y-2">
+        <Label>Email *</Label>
+        <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ejemplo.com" />
+      </div>
+
+      {/* Destino */}
+      <div className="space-y-2">
+        <Label>Destino (opcional según perfil)</Label>
+        <Select value={destinationId} onValueChange={setDestinationId}>
+          <SelectTrigger><SelectValue placeholder="Sin destino asignado" /></SelectTrigger>
+          <SelectContent>
+            {destList.map((d: any) => (
+              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      {/* Cargo */}
+      <div className="space-y-2">
+        <Label>Cargo</Label>
+        <Input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Director de TI" />
+      </div>
+
+      {/* Teléfono */}
+      <div className="space-y-2">
+        <Label>Teléfono</Label>
+        <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+54 11 1234-5678" />
+      </div>
+
+      {/* Contraseña (solo creación) */}
+      {!user && (
+        <div className="space-y-2">
+          <Label>Contraseña (generada automáticamente)</Label>
+          <div className="flex gap-2">
+            <Input value={password} readOnly className="font-mono text-sm bg-gray-50" />
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPassword(generatePassword())}
+              className="shrink-0"
+            >
+              Regenerar
+            </Button>
+          </div>
+          <p className="text-xs text-gray-400">Copiala antes de guardar — no se mostrará después.</p>
+        </div>
+      )}
+
+      <Button onClick={handleSave} disabled={saving} className="w-full">
+        <Save className="mr-2 h-4 w-4" />{saving ? 'Guardando...' : (user ? 'Actualizar Usuario' : 'Crear Usuario')}
+      </Button>
+    </div>
+  );
+}

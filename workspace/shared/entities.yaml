@@ -1,0 +1,99 @@
+entities:
+  - name: User
+    history: true
+    fields:
+      - name: ID
+        type: uuid
+        primary: true
+      - name: Email
+        type: string
+        unique: true
+      - name: PasswordHash
+        type: string
+      - name: FullName
+        type: string
+      - name: RoleID
+        type: uuid
+        references: Role
+      - name: IsActive
+        type: boolean
+      - name: DestinationID
+        type: uuid
+        nullable: true
+      - name: CreatedAt
+        type: timestamp
+      - name: UpdatedAt
+        type: timestamp
+
+  - name: Role
+    fields:
+      - name: ID
+        type: uuid
+        primary: true
+      - name: Name
+        type: string
+        unique: true
+      - name: Description
+        type: string
+      - name: Permissions
+        type: json
+
+  - name: AuditLog
+    fields:
+      - name: ID
+        type: uuid
+        primary: true
+      - name: EntityType
+        type: string
+      - name: EntityID
+        type: uuid
+      - name: Action
+        type: string
+      - name: OldValue
+        type: json
+      - name: NewValue
+        type: json
+      - name: ChangedBy
+        type: uuid
+      - name: ChangedAt
+        type: timestamp
+      - name: IPAddress
+        type: string
+
+  - name: Destination
+    fields:
+      - name: ID
+        type: uuid
+        primary: true
+      - name: Name
+        type: string
+      - name: Country
+        type: string
+      - name: SubnationalLevelID
+        type: uuid
+        nullable: true
+      - name: TypologyID
+        type: uuid
+        nullable: true
+      - name: PopulationRangeID
+        type: uuid
+        nullable: true
+      - name: RegionID
+        type: uuid
+        nullable: true
+      - name: MemberTypeID
+        type: uuid
+        nullable: true
+      - name: Lat
+        type: decimal
+        nullable: true
+      - name: Lng
+        type: decimal
+        nullable: true
+      - name: IsAdhered
+        type: boolean
+        default: false
+      - name: CreatedAt
+        type: timestamp
+      - name: UpdatedAt
+        type: timestamp

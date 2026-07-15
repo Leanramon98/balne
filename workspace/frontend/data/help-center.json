@@ -1,0 +1,100 @@
+{
+  "topics": [
+    {
+      "id": "cargar-indicadores",
+      "icon": "Activity",
+      "title_es": "Cargar indicadores",
+      "title_pt": "Carregar indicadores",
+      "description_es": "Aprendé a completar los indicadores de una evaluación paso a paso.",
+      "description_pt": "Aprenda a preencher os indicadores de uma avaliação passo a passo.",
+      "order": 1,
+      "steps": [
+        {
+          "id": "ci-01",
+          "title_es": "Ingresar a una evaluación",
+          "title_pt": "Entrar em uma avaliação",
+          "description_es": "Desde el panel de inicio o la sección Evaluaciones, seleccioná una evaluación activa para comenzar la carga.",
+          "description_pt": "Pelo painel inicial ou pela seção Avaliações, selecione uma avaliação ativa para começar o preenchimento.",
+          "image": "/help-center/1783354171943-s547x9.png",
+          "order": 0
+        },
+        {
+          "id": "ci-02",
+          "title_es": "Seleccionar ámbito",
+          "title_pt": "Selecionar âmbito",
+          "description_es": "Dentro de la evaluación, navegá por los ámbitos (GOB, INN, TEC, SOST, ACC).",
+          "description_pt": "Dentro da avaliação, navegue pelos âmbitos (GOB, INN, TEC, SOST, ACC).",
+          "image": "/help-center/1783354116935-ha9h8r.png",
+          "order": 1
+        },
+        {
+          "id": "step-1783349926253",
+          "title_es": "Seleccionar indicador",
+          "title_pt": "Selecionar indicador",
+          "description_es": "Elegí el indicador que querés completar.",
+          "description_pt": "Escolha o indicador que deseja preencher.",
+          "image": "/help-center/1783354124403-k7fiqh.png",
+          "order": 2
+        },
+        {
+          "id": "ci-03",
+          "title_es": "Completar valores",
+          "title_pt": "Preencher valores",
+          "description_es": "Según el tipo de indicador (gradiente, booleano o numérico), cargá el valor actual, la meta y las observaciones correspondientes.",
+          "description_pt": "Conforme o tipo de indicador (gradiente, booleano ou numérico), carregue o valor atual, a meta e as observações correspondentes.",
+          "image": "/help-center/1783354138251-htdl11.png",
+          "order": 3
+        },
+        {
+          "id": "ci-04",
+          "title_es": "Guardar y continuar",
+          "title_pt": "Salvar e continuar",
+          "description_es": "Una vez completados los campos, guardá el valor. \nRecorda cargar acciones y evidencias.\n\nEl sistema actualiza automáticamente el progreso del ámbito.",
+          "description_pt": "Após preencher os campos, salve o valor. \nLembre-se de enviar as ações e as evidências.\n\nO sistema atualiza automaticamente o progresso do âmbito.",
+          "image": "/help-center/1783354143528-e6sfyb.png",
+          "tip_es": "Podés adjuntar evidencias (documentos, imágenes, URLs) para respaldar el valor cargado.",
+          "tip_pt": "Você pode anexar evidências (documentos, imagens, URLs) para apoiar o valor informado.",
+          "order": 4
+        }
+      ]
+    },
+    {
+      "id": "evaluaciones",
+      "icon": "ClipboardList",
+      "title_es": "Evaluaciones",
+      "title_pt": "Avaliações",
+      "description_es": "Creá, gestioná y cerrá evaluaciones del ciclo DTI.",
+      "description_pt": "Crie, gerencie e encerre avaliações do ciclo DTI.",
+      "order": 0,
+      "steps": [
+        {
+          "id": "ev-01",
+          "title_es": "Crear una evaluación",
+          "title_pt": "Criar uma avaliação",
+          "description_es": "Desde el botón 'Nueva evaluación' elegí el destino, el tipo (autodiagnóstico, diagnóstico, auditoría) y las fechas del ciclo.",
+          "description_pt": "Pelo botão 'Nova avaliação' escolha o destino, o tipo (autodiagnóstico, diagnóstico, auditoria) e as datas do ciclo.",
+          "image": "/help-center/1783354185036-uly20v.png",
+          "order": 0
+        },
+        {
+          "id": "ev-02",
+          "title_es": "Gestionar estados",
+          "title_pt": "Gerenciar estados",
+          "description_es": "Las evaluaciones avanzan por estados: borrador → en curso → carga finalizada → en evaluación → cerrada. Solo usuarios con permisos pueden cambiar de estado.",
+          "description_pt": "As avaliações avançam por estados: rascunho → em andamento → carga finalizada → em avaliação → encerrada. Apenas usuários com permissão podem mudar de estado.",
+          "image": "/help-center/1783354193348-x94mr0.png",
+          "order": 1
+        },
+        {
+          "id": "ev-03",
+          "title_es": "Revisar y cerrar",
+          "title_pt": "Revisar e encerrar",
+          "description_es": "Una vez que el evaluador completa su revisión, la evaluación puede cerrarse. A partir de ahí se puede promover a un ciclo superior.",
+          "description_pt": "Após o avaliador completar sua revisão, a avaliação pode ser encerrada. A partir daí pode ser promovida para um ciclo superior.",
+          "image": "/help-center/1783354198163-z8l7p0.png",
+          "order": 2
+        }
+      ]
+    }
+  ]
+}

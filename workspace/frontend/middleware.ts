@@ -1,0 +1,90 @@
+import { NextRequest, NextResponse } from 'next/server';
+import type { NextRequest as NextRequestType } from 'next/server';
+import { locales, defaultLocale, cookieName } from '@/i18n/routing';
+
+const PUBLIC_ROUTES = [
+  '/login',
+  '/recuperar',
+  '/auth/reset-password',
+  '/api/auth/login',
+  '/api/auth/logout',
+  '/api/auth/me',
+  '/api/users/auth/forgot-password',
+  '/api/users/auth/reset-password',
+  '/api/public',
+  '/api/help-center',
+];
+
+// Routes that require a valid token but NOT a completed first-login.
+// The user just authenticated but hasn't set their password yet.
+const AUTH_ONLY_ROUTES = [
+  '/cambiar-contrasena',
+  '/api/auth/complete-onboarding',
+];
+
+export function middleware(request: NextRequestType) {
+  const { pathname } = request.nextUrl;
+
+  // ── Locale detection ──────────────────────────────────────────────
+  const rawLocale = request.cookies.get(cookieName)?.value;
+  const locale = rawLocale && (locales as readonly string[]).includes(rawLocale) ? rawLocale : defaultLocale;
+
+  // Allow public routes (no token required)
+  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+    const response = NextResponse.next();
+    response.headers.set('x-next-intl-locale', locale);
+    return response;
+  }
+
+  // Allow static assets and Next.js internals
+  if (
+    pathname.startsWith('/_next') ||
+    pathname.startsWith('/favicon.ico')
+  ) {
+    const response = NextResponse.next();
+    response.headers.set('x-next-intl-locale', locale);
+    return response;
+  }
+
+  // Check for auth token in httpOnly cookie
+  const token = request.cookies.get('auto_insight_token')?.value;
+
+  if (!token) {
+    const loginUrl = new URL('/login', request.url);
+    loginUrl.searchParams.set('redirect', pathname);
+    return NextResponse.redirect(loginUrl);
+  }
+
+  // AUTH_ONLY_ROUTES: token required but no first-login enforcement.
+  // These are the onboarding pages themselves — allow them through.
+  if (AUTH_ONLY_ROUTES.some(route => pathname.startsWith(route))) {
+    const response = NextResponse.next();
+    response.headers.set('x-next-intl-locale', locale);
+    return response;
+  }
+
+  // First-login guard: if the first_login cookie is set to '1', redirect
+  // to the onboarding form before the user can access any app page.
+  const firstLogin = request.cookies.get('auto_insight_first_login')?.value;
+  if (firstLogin === '1') {
+    return NextResponse.redirect(new URL('/cambiar-contrasena', request.url));
+  }
+
+  // Authenticated request: set locale header and continue
+  const response = NextResponse.next();
+  response.headers.set('x-next-intl-locale', locale);
+  return response;
+}
+
+export const config = {
+  matcher: [
+    /*
+     * Match all request paths except:
+     * - _next/static (static files)
+     * - _next/image (image optimization files)
+     * - favicon.ico (favicon file)
+     * - public folder
+     */
+    '/((?!_next/static|_next/image|favicon.ico|.*\.(?:svg|png|jpg|jpeg|gif|webp)$).*)',
+  ],
+};

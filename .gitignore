@@ -1,0 +1,52 @@
+# ── OS ──────────────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+Desktop.ini
+*.swp
+*.swo
+*~
+
+# ── IDE / Editor ──────────────────────────────────────────────────
+.idea/
+.vscode/
+*.iml
+*.sublime-*
+
+# ── Go ─────────────────────────────────────────────────────────────
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+*.test
+*.out
+vendor/
+workspace/services/**/null
+
+# ── Node / Frontend ───────────────────────────────────────────────
+node_modules/
+.next/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# ── Docker ────────────────────────────────────────────────────────
+*.log
+docker-compose.override.yml
+
+# ── Environment ───────────────────────────────────────────────────
+.env
+.env.local
+.env.*.local
+
+# ── Test artifacts ──────────────────────────────────────────────
+e2e-auth*.json
+test-results/
+playwright-report/
+
+# ── Build artifacts ───────────────────────────────────────────────
+dist/
+build/
+tmp/
+*.tsbuildinfo
+~$*.docx

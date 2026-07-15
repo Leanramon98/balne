@@ -1,0 +1,55 @@
+name: auto-insight-platform
+shared_entities: shared/entities.yaml
+
+services:
+  - name: users-service
+    schema_path: services/users-service/schema.yaml
+    uses: [User, Role, AuditLog]
+    infra:
+      port: 8081
+      db:
+        engine: postgres
+        name: users_db
+
+  - name: evaluations-service
+    schema_path: services/evaluations-service/schema.yaml
+    uses: [Destination]
+    infra:
+      port: 8082
+      db:
+        engine: postgres
+        name: evaluations_db
+      messaging:
+        enabled: true
+
+gateways:
+  - name: api-gateway
+    port: 8080
+    services:
+      - name: users-service
+        prefix: /api/users
+      - name: evaluations-service
+        prefix: /api/evaluations
+
+frontends:
+  - name: portal
+    kind: both
+    framework: nextjs
+    services: [users-service]
+    domain: localhost:3000
+
+infrastructure:
+  docker:
+    compose_version: "3.8"
+    network: auto-insight-net
+  messaging:
+    engine: rabbitmq
+    port: 5672
+    management_port: 15672
+  telemetry:
+    enabled: true
+  kubernetes:
+    enabled: false
+
+settings:
+  output_naming: _generated
