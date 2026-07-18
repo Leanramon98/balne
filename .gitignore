@@ -22,6 +22,7 @@ Desktop.ini
 *.out
 /bin/
 api-gateway
+workspace/backend/platform
 vendor/
 workspace/services/**/null
 
