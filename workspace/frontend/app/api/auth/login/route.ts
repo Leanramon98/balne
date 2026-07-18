@@ -54,6 +54,16 @@ export async function POST(req: NextRequest) {
         }
       : null;
 
+    // Extract neutral session claims from JWT (org_id, mem_id, deployment_mode).
+    // These come from the users-service LoginClaims and carry tenant context.
+    const orgId = claims?.org_id as string | undefined;
+    const membershipId = claims?.mem_id as string | undefined;
+    const deploymentMode = claims?.deployment_mode as string | undefined;
+    const hasSession = !!(orgId && membershipId);
+    const session = hasSession
+      ? { organization_id: orgId, membership_id: membershipId, deployment_mode: deploymentMode || '' }
+      : null;
+
     // Create response and set httpOnly cookies.
     // Token is also returned in body so the client can store it in localStorage
     // for client-side RBAC guards (RoleGuard reads from localStorage 'auth_token').
@@ -63,6 +73,7 @@ export async function POST(req: NextRequest) {
       token,
       role: role || null,
       first_login: firstLogin,
+      session,
       message: 'Login successful'
     });
 
@@ -92,6 +103,19 @@ export async function POST(req: NextRequest) {
     // without having to decode the JWT on every request.
     // Deleted (maxAge=0) once CompleteOnboarding clears it server-side.
     response.cookies.set('auto_insight_first_login', firstLogin ? '1' : '0', cookieOptions);
+
+    // Set neutral session cookies when JWT contains neutral claims (dual mode).
+    // These cookies carry tenant context across the BFF and proxy layers.
+    // HttpOnly prevents client-side JavaScript from reading them.
+    if (orgId) {
+      response.cookies.set('auto_insight_organization_id', orgId, cookieOptions);
+    }
+    if (membershipId) {
+      response.cookies.set('auto_insight_membership_id', membershipId, cookieOptions);
+    }
+    if (deploymentMode) {
+      response.cookies.set('auto_insight_deployment_mode', deploymentMode, cookieOptions);
+    }
 
     return response;
   } catch (error: any) {

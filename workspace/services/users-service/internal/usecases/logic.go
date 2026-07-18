@@ -27,6 +27,16 @@ type RoleRepository interface {
 	FindAll(ctx context.Context) ([]*domain.Role, error)
 }
 
+// OrganizationRepository defines the contract for reading organizations by principal.
+type OrganizationRepository interface {
+	FindByPrincipalID(ctx context.Context, principalID uuid.UUID) (*domain.Organization, error)
+}
+
+// MembershipRepository defines the contract for reading memberships by principal.
+type MembershipRepository interface {
+	FindByPrincipalID(ctx context.Context, principalID uuid.UUID) (*domain.Membership, error)
+}
+
 // PasswordResetRepository defines the contract for password reset token persistence.
 type PasswordResetRepository interface {
 	Save(ctx context.Context, token *domain.PasswordResetToken) error
@@ -39,11 +49,14 @@ type PasswordResetRepository interface {
 type Logic struct {
 	users             UserRepository
 	roles             RoleRepository
-	passwordResetRepo  PasswordResetRepository
-	emailSvc           portout.EmailService
-	templateRenderer   portout.TemplateRenderer
-	frontendURL        string
-	logoURL            string
+	passwordResetRepo PasswordResetRepository
+	emailSvc          portout.EmailService
+	templateRenderer  portout.TemplateRenderer
+	frontendURL       string
+	logoURL           string
+	organizations     OrganizationRepository
+	memberships       MembershipRepository
+	deploymentMode    string
 }
 
 // LogicOption is a functional option for configuring Logic.
@@ -81,6 +94,27 @@ func WithEmailService(svc portout.EmailService) LogicOption {
 func WithTemplateRenderer(tr portout.TemplateRenderer) LogicOption {
 	return func(l *Logic) {
 		l.templateRenderer = tr
+	}
+}
+
+// WithOrganizationRepository injects an OrganizationRepository for neutral claims.
+func WithOrganizationRepository(repo OrganizationRepository) LogicOption {
+	return func(l *Logic) {
+		l.organizations = repo
+	}
+}
+
+// WithMembershipRepository injects a MembershipRepository for neutral claims.
+func WithMembershipRepository(repo MembershipRepository) LogicOption {
+	return func(l *Logic) {
+		l.memberships = repo
+	}
+}
+
+// WithDeploymentMode sets the deployment mode for the logic layer.
+func WithDeploymentMode(mode string) LogicOption {
+	return func(l *Logic) {
+		l.deploymentMode = mode
 	}
 }
 

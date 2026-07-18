@@ -15,6 +15,9 @@ async function handler(
 
   const token = req.cookies.get('auto_insight_token')?.value;
   const tenantId = req.cookies.get('auto_insight_tenant_id')?.value;
+  const orgId = req.cookies.get('auto_insight_organization_id')?.value;
+  const membershipId = req.cookies.get('auto_insight_membership_id')?.value;
+  const deploymentMode = req.cookies.get('auto_insight_deployment_mode')?.value;
 
   const headers = new Headers(req.headers);
 
@@ -37,6 +40,17 @@ async function handler(
   }
   if (tenantId) {
     headers.set('X-Tenant-ID', tenantId);
+  }
+
+  // Forward neutral session context headers (alongside existing Authorization/X-Tenant-ID)
+  if (orgId) {
+    headers.set('X-Organization-ID', orgId);
+  }
+  if (membershipId) {
+    headers.set('X-Membership-ID', membershipId);
+  }
+  if (deploymentMode) {
+    headers.set('X-Deployment-Mode', deploymentMode);
   }
 
   headers.set('X-Correlation-ID', crypto.randomUUID());

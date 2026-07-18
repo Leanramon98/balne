@@ -11,8 +11,8 @@ import (
 	"github.com/google/uuid"
 	"golang.org/x/crypto/bcrypt"
 
-	"users-service/internal/domain"
 	httpadapter "users-service/internal/adapters/in/http"
+	"users-service/internal/domain"
 	portin "users-service/internal/ports/in"
 )
 
@@ -56,44 +56,78 @@ func (l *Logic) PostAuthLogin(ctx context.Context, req portin.PostAuthLoginReque
 	}
 	if len(role.Permissions) > 0 {
 		if err := json.Unmarshal(role.Permissions, &ps); err != nil {
-			// If permissions are invalid, use defaults
 			ps = domain.PermissionSet{AccessScope: "destination"}
 		}
 	}
 
-	// 6. Build extended JWT claims
+	// 6. Look up neutral organization/membership for dual-mode
+	var orgID, memID *uuid.UUID
+	deployMode := l.deploymentMode
+	hasNeutral := false
+
+	if l.organizations != nil && l.memberships != nil {
+		membership, memErr := l.memberships.FindByPrincipalID(ctx, user.ID)
+		if memErr == nil && membership != nil {
+			org, orgErr := l.organizations.FindByPrincipalID(ctx, user.ID)
+			if orgErr == nil && org != nil {
+				orgID = &org.ID
+				memID = &membership.ID
+				hasNeutral = true
+			}
+		}
+	}
+
+	// 7. Build LoginClaims with combined neutral + legacy DTI fields
+	now := time.Now()
+	registered := jwt.RegisteredClaims{
+		ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour)),
+		IssuedAt:  jwt.NewNumericDate(now),
+	}
+
 	var destIDStr *string
 	if user.DestinationID != nil {
 		s := user.DestinationID.String()
 		destIDStr = &s
 	}
 
-	claims := &httpadapter.ExtendedClaims{
-		UserID:   user.ID.String(),
-		Email:    user.Email,
-		FullName: user.FullName,
-		Role:     role.Name,
+	loginClaims := &httpadapter.LoginClaims{
+		RegisteredClaims: registered,
+		// Legacy DTI fields (always present)
+		UserID:        user.ID.String(),
+		Email:         user.Email,
+		FullName:      user.FullName,
+		Role:          role.Name,
 		DestinationID: destIDStr,
-		Permissions: httpadapter.PermissionClaims{
+		Permissions: &httpadapter.PermissionClaims{
 			AccessScope:             ps.AccessScope,
 			CanWriteValues:          ps.CanWriteValues,
 			CanManageUsers:          ps.CanManageUsers,
 			CanApproveGoodPractices: ps.CanApproveGoodPractices,
 			EvaluationTypes:         ps.EvaluationTypes,
 		},
-		RegisteredClaims: jwt.RegisteredClaims{
-			ExpiresAt: jwt.NewNumericDate(time.Now().Add(24 * time.Hour)),
-			IssuedAt:  jwt.NewNumericDate(time.Now()),
-		},
 	}
 
-	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	// Add neutral claims when org/membership exists (dual mode)
+	if hasNeutral {
+		sessionID := uuid.New()
+		loginClaims.SubjectID = user.ID.String()
+		loginClaims.SessionID = sessionID.String()
+		if orgID != nil {
+			loginClaims.OrganizationID = orgID.String()
+		}
+		if memID != nil {
+			loginClaims.MembershipID = memID.String()
+		}
+		loginClaims.DeploymentMode = deployMode
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, loginClaims)
 	tokenString, err := token.SignedString(httpadapter.JWTSecret)
 	if err != nil {
 		return portin.PostAuthLoginResponse{}, errors.New("failed to generate token")
 	}
 
-	// 7. Build LoginResponse with extended fields
+	// 8. Build LoginResponse with legacy DTI fields + neutral fields
 	var destID *uuid.UUID
 	if user.DestinationID != nil {
 		destID = user.DestinationID
@@ -107,6 +141,10 @@ func (l *Logic) PostAuthLogin(ctx context.Context, req portin.PostAuthLoginReque
 			DestinationID: destID,
 			Permissions:   ps,
 			FirstLogin:    user.FirstLogin,
+			// Neutral tenant fields (dual mode)
+			OrganizationID: orgID,
+			MembershipID:   memID,
+			DeploymentMode: deployMode,
 		},
 	}
 

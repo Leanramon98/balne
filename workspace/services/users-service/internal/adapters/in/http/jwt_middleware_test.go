@@ -15,8 +15,8 @@ func TestExtendedClaims_Serialize(t *testing.T) {
 	destID := uuid.New().String()
 
 	claims := ExtendedClaims{
-		UserID: userID,
-		Role:   "admin_destino",
+		UserID:        userID,
+		Role:          "admin_destino",
 		DestinationID: &destID,
 		Permissions: PermissionClaims{
 			AccessScope:             "destination",
@@ -101,6 +101,59 @@ func TestExtendedClaims_NilDestinationID(t *testing.T) {
 	}
 	if parsed.DestinationID != nil {
 		t.Error("expected DestinationID to be nil for admin user")
+	}
+}
+
+func TestNeutralClaims_Serialize(t *testing.T) {
+	// RED: Verify NeutralClaims can be serialized/deserialized via JWT
+	subID := uuid.New().String()
+	sessionID := uuid.New().String()
+	orgID := uuid.New().String()
+	memID := uuid.New().String()
+
+	claims := NeutralClaims{
+		SubjectID:      subID,
+		SessionID:      sessionID,
+		OrganizationID: orgID,
+		MembershipID:   memID,
+		DeploymentMode: "saas",
+		RegisteredClaims: jwt.RegisteredClaims{
+			ExpiresAt: jwt.NewNumericDate(time.Now().Add(time.Hour)),
+			IssuedAt:  jwt.NewNumericDate(time.Now()),
+		},
+	}
+
+	token := jwt.NewWithClaims(jwt.SigningMethodHS256, claims)
+	tokenString, err := token.SignedString(JWTSecret)
+	if err != nil {
+		t.Fatalf("failed to sign token: %v", err)
+	}
+
+	parsed := &NeutralClaims{}
+	parsedToken, err := jwt.ParseWithClaims(tokenString, parsed, func(token *jwt.Token) (interface{}, error) {
+		return JWTSecret, nil
+	})
+	if err != nil {
+		t.Fatalf("failed to parse token: %v", err)
+	}
+	if !parsedToken.Valid {
+		t.Fatal("parsed token is not valid")
+	}
+
+	if parsed.SubjectID != subID {
+		t.Errorf("SubjectID: got %q, want %q", parsed.SubjectID, subID)
+	}
+	if parsed.SessionID != sessionID {
+		t.Errorf("SessionID: got %q, want %q", parsed.SessionID, sessionID)
+	}
+	if parsed.OrganizationID != orgID {
+		t.Errorf("OrganizationID: got %q, want %q", parsed.OrganizationID, orgID)
+	}
+	if parsed.MembershipID != memID {
+		t.Errorf("MembershipID: got %q, want %q", parsed.MembershipID, memID)
+	}
+	if parsed.DeploymentMode != "saas" {
+		t.Errorf("DeploymentMode: got %q, want 'saas'", parsed.DeploymentMode)
 	}
 }
 

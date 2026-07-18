@@ -20,6 +20,8 @@ Desktop.ini
 *.dylib
 *.test
 *.out
+/bin/
+api-gateway
 vendor/
 workspace/services/**/null
 
@@ -33,6 +35,7 @@ yarn-error.log*
 # ── Docker ────────────────────────────────────────────────────────
 *.log
 docker-compose.override.yml
+!workspace/docker-compose.override.yml
 
 # ── Environment ───────────────────────────────────────────────────
 .env
@@ -43,6 +46,9 @@ docker-compose.override.yml
 e2e-auth*.json
 test-results/
 playwright-report/
+
+# ── Code intelligence ──────────────────────────────────────────────
+.codegraph/
 
 # ── Build artifacts ───────────────────────────────────────────────
 dist/

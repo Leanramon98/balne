@@ -36,7 +36,16 @@ export async function GET(req: NextRequest) {
       roles: [(claims.role as string) || ''],
     };
 
-    return NextResponse.json({ user });
+    // Read neutral session cookies set during login.
+    const orgId = req.cookies.get('auto_insight_organization_id')?.value;
+    const membershipId = req.cookies.get('auto_insight_membership_id')?.value;
+    const deploymentMode = req.cookies.get('auto_insight_deployment_mode')?.value;
+
+    const session = (orgId && membershipId)
+      ? { organization_id: orgId, membership_id: membershipId, deployment_mode: deploymentMode || '' }
+      : null;
+
+    return NextResponse.json({ user, session });
   } catch (error: any) {
     console.error('BFF Me Error:', error);
     return NextResponse.json({ error: 'Internal error' }, { status: 500 });

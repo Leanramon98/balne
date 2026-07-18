@@ -1,0 +1,26 @@
+{
+  "schema_version": 1,
+  "checks_count": 15,
+  "check_ids_sha256": "17fa6ce090f5a1e17f41dceaef6af648d2bcda83945806e3be6f7423a9faca38",
+  "file_checks": [
+    {"id":"auth-context","category":"login-session","state":"known-unsafe","path":"workspace/frontend/sdk/auth/AuthContext.tsx","sha256":"c2bcc773be70bc31f2afba9cfd9ac7fb5c0efd48a25adb3270d01adf4dfbcf64","contains":["fetch('/api/auth/login'","localStorage.setItem('auth_token'"],"absent":[]},
+    {"id":"auth-login-bff","category":"login-session","state":"known-unsafe","path":"workspace/frontend/app/api/auth/login/route.ts","sha256":"1bfd7ec1e05fdd1ce510fb6c56255af338b893e89b03193d50cd991d17ef4165","contains":["/api/users/auth/login","auto_insight_token","auto_insight_tenant_id","Decode a JWT payload without verifying"],"absent":[]},
+    {"id":"auth-me-bff","category":"login-session","state":"known-unsafe","path":"workspace/frontend/app/api/auth/me/route.ts","sha256":"367d9c487de98b41bfae4815007ef0a3bdef1c3e2dcecc08828684501342100d","contains":["auto_insight_token","Decode a JWT payload without verifying"],"absent":[]},
+    {"id":"generic-bff","category":"sdk-bff","state":"current","path":"workspace/frontend/app/api/[...path]/route.ts","sha256":"5ad0170a9517611ed4cd63cb0659f9b806d1d306c7de6c276c77f45d5b4086d5","contains":["INTERNAL_GATEWAY_URL","headers.set('X-Tenant-ID'","res.status === 204"],"absent":[]},
+    {"id":"gateway-generated-routes","category":"gateway-routes","state":"generated-current","path":"workspace/gateways/api-gateway/main_generated.go","sha256":"c5c09b0d9a805ffa869890fad7db20aa33aa66c33462d56ec69981440614f082","contains":["RegisterEvaluationRoutes(e)","RegisterUserRoutes(e)","/api/users/auth/login"],"absent":[]},
+    {"id":"gateway-custom-routes","category":"gateway-routes","state":"dti-coupled","path":"workspace/gateways/api-gateway/routes_evaluations.go","sha256":"fd70000900765efd2774ca9d22d0634bb11e45c0c364d11f0417f73706cb7e56","contains":["auth(\"GET\", \"/evaluations\")","auth(\"GET\", \"/dti-plans\")"],"absent":[]},
+    {"id":"gateway-auth","category":"tenant-identity","state":"known-unsafe","path":"workspace/gateways/api-gateway/middleware.go","sha256":"520e18d0df8efffdf8f72e66f84ea5a97aa231867289c7c89f5aa44a1ec2e625","contains":["X-Authenticated-User","For now, allow all authenticated requests"],"absent":["X-Tenant-ID"]},
+    {"id":"evaluation-dti-claims","category":"tenant-identity","state":"dti-coupled","path":"workspace/services/evaluations-service/internal/adapters/in/http/jwt_middleware.go","sha256":"d6c9bb0476dd5498cbab7d600d3f0d160a99faeee2695c3b9e440b016cc421e9","contains":["DestinationID *string","PermissionClaims are the DTI permission claims"],"absent":[]}
+  ],
+  "migration_checks": [
+    {"id":"users-migrations","category":"migrations","path":"workspace/services/users-service/migrations","count":14,"first":"1778788331_create_LoginRequest.up.sql","last":"1782110000_set_firstlogin_true_for_existing.up.sql","names_sha256":"4a93f233be468de940e0eabe126baf1f3087192682886ab402d966198e0abbbf"},
+    {"id":"evaluations-migrations","category":"migrations","path":"workspace/services/evaluations-service/migrations","count":27,"first":"1781116109_create_HealthResponse.up.sql","last":"1783992635_add_meta_to_indicator_history.up.sql","names_sha256":"a0538fba15abda03370b06bbb68056cf62c94f1576abd4d91d314087609dff36"}
+  ],
+  "forbidden_checks": [
+    {"id":"ui-bff-boundary","category":"sdk-bff","roots":["workspace/frontend/components","workspace/frontend/app/(dti)"],"suffixes":[".ts",".tsx"],"forbidden":["INTERNAL_GATEWAY_URL","http://localhost:8080","workspace/services/"]},
+    {"id":"users-no-evaluations-import","category":"cross-module","roots":["workspace/services/users-service"],"suffixes":[".go"],"forbidden":["evaluations-service/"]},
+    {"id":"evaluations-no-users-import","category":"cross-module","roots":["workspace/services/evaluations-service"],"suffixes":[".go"],"forbidden":["users-service/"]},
+    {"id":"neutral-backend-boundary","category":"cross-module","roots":["workspace/backend"],"suffixes":[".go"],"forbidden":["workspace/services/","evaluations-service","users-service","DestinationID","dti-plans"]}
+  ],
+  "preservation_check": {"id":"preservation-regression","category":"recovery-generation","command":"scripts/verify-preservation.sh","argument":"--source-only"}
+}

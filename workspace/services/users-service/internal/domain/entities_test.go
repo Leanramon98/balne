@@ -172,6 +172,75 @@ func TestAuditLog_FixedTypes(t *testing.T) {
 	})
 }
 
+func TestLoginResponse_NeutralFields(t *testing.T) {
+	// RED: Verify LoginResponse optionally carries neutral tenant fields
+	orgID := uuid.MustParse("20000000-0000-0000-0000-000000000001")
+	memID := uuid.MustParse("30000000-0000-0000-0000-000000000001")
+
+	t.Run("neutral fields are nil by default", func(t *testing.T) {
+		r := LoginResponse{Token: "abc"}
+		if r.OrganizationID != nil {
+			t.Error("expected OrganizationID to be nil by default")
+		}
+		if r.MembershipID != nil {
+			t.Error("expected MembershipID to be nil by default")
+		}
+		if r.DeploymentMode != "" {
+			t.Errorf("expected DeploymentMode to be empty, got %q", r.DeploymentMode)
+		}
+	})
+
+	t.Run("neutral fields can be set", func(t *testing.T) {
+		r := LoginResponse{
+			Token:          "abc",
+			OrganizationID: &orgID,
+			MembershipID:   &memID,
+			DeploymentMode: "saas",
+		}
+		if r.OrganizationID == nil {
+			t.Fatal("expected OrganizationID to be non-nil")
+		}
+		if *r.OrganizationID != orgID {
+			t.Errorf("OrganizationID: got %v, want %v", *r.OrganizationID, orgID)
+		}
+		if r.MembershipID == nil {
+			t.Fatal("expected MembershipID to be non-nil")
+		}
+		if *r.MembershipID != memID {
+			t.Errorf("MembershipID: got %v, want %v", *r.MembershipID, memID)
+		}
+		if r.DeploymentMode != "saas" {
+			t.Errorf("DeploymentMode: got %q, want 'saas'", r.DeploymentMode)
+		}
+	})
+
+	t.Run("neutral fields survive JSON round-trip", func(t *testing.T) {
+		r := LoginResponse{
+			Token:          "jwt-token",
+			OrganizationID: &orgID,
+			MembershipID:   &memID,
+			DeploymentMode: "dedicated",
+		}
+		data, err := json.Marshal(r)
+		if err != nil {
+			t.Fatalf("marshal: %v", err)
+		}
+		var decoded LoginResponse
+		if err := json.Unmarshal(data, &decoded); err != nil {
+			t.Fatalf("unmarshal: %v", err)
+		}
+		if decoded.OrganizationID == nil || *decoded.OrganizationID != orgID {
+			t.Errorf("OrganizationID round-trip: got %v, want %v", decoded.OrganizationID, orgID)
+		}
+		if decoded.MembershipID == nil || *decoded.MembershipID != memID {
+			t.Errorf("MembershipID round-trip: got %v, want %v", decoded.MembershipID, memID)
+		}
+		if decoded.DeploymentMode != "dedicated" {
+			t.Errorf("DeploymentMode round-trip: got %q, want 'dedicated'", decoded.DeploymentMode)
+		}
+	})
+}
+
 func TestLoginResponse_Extended(t *testing.T) {
 	// RED: Verify LoginResponse includes new fields
 	userID := uuid.New()

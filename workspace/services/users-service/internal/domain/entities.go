@@ -30,6 +30,11 @@ type LoginResponse struct {
 	DestinationID *uuid.UUID    `json:"destination_id,omitempty"`
 	Permissions   PermissionSet `json:"permissions"`
 	FirstLogin    bool          `json:"first_login"`
+
+	// Neutral tenant fields (dual mode — present when org/membership exists)
+	OrganizationID *uuid.UUID `json:"organization_id,omitempty"`
+	MembershipID   *uuid.UUID `json:"membership_id,omitempty"`
+	DeploymentMode string     `json:"deployment_mode,omitempty"`
 }
 
 // RegisterRequest is a domain entity.
@@ -118,4 +123,3 @@ type AuditLog struct {
 	ChangedAt  time.Time
 	IPAddress  string
 }
-

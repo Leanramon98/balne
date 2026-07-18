@@ -14,6 +14,12 @@ export async function POST() {
   response.cookies.set('auto_insight_token', '', cookieOptions);
   response.cookies.set('auto_insight_tenant_id', '', cookieOptions);
   response.cookies.set('auto_insight_role', '', cookieOptions);
+  response.cookies.set('auto_insight_first_login', '', cookieOptions);
+
+  // Clear neutral session cookies
+  response.cookies.set('auto_insight_organization_id', '', cookieOptions);
+  response.cookies.set('auto_insight_membership_id', '', cookieOptions);
+  response.cookies.set('auto_insight_deployment_mode', '', cookieOptions);
 
   return response;
 }
