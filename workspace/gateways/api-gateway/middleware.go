@@ -14,11 +14,11 @@ import (
 // Fields match the users-service NeutralClaims definition; UUIDs are stored
 // as strings here because the gateway only forwards them as HTTP headers.
 type NeutralClaims struct {
-	SubjectID      string `json:"sub_id"`
+	SubjectID      string `json:"sub"`
 	SessionID      string `json:"sid"`
 	OrganizationID string `json:"org_id"`
 	MembershipID   string `json:"mem_id"`
-	DeploymentMode string `json:"dep_mode"`
+	DeploymentMode string `json:"deployment_mode"`
 	jwt.RegisteredClaims
 }
 

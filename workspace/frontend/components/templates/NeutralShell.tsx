@@ -20,9 +20,18 @@ import {
   Menu,
   X,
   Loader2,
+  LogOut,
   type LucideIcon,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 
 /**
  * Resolve a string icon name to a lucide-react component.
@@ -57,7 +66,6 @@ interface NavItemProps {
 
 function NavItem({ href, icon: Icon, label, disabled, title, onClick }: NavItemProps) {
   const pathname = usePathname();
-  const [navigating, setNavigating] = useState(false);
   const isActive = !disabled && (href === '/' ? pathname === '/' : pathname?.startsWith(href));
 
   const className = cn(
@@ -83,14 +91,9 @@ function NavItem({ href, icon: Icon, label, disabled, title, onClick }: NavItemP
       href={href}
       className={className}
       title={title}
-      onClick={() => {
-        setNavigating(true);
-        onClick?.();
-      }}
+      onClick={onClick}
     >
-      {navigating ? (
-        <Loader2 className="h-4 w-4 shrink-0 animate-spin" />
-      ) : Icon ? (
+      {Icon ? (
         <Icon className="h-4 w-4 shrink-0" />
       ) : (
         <span className="h-4 w-4 shrink-0" />
@@ -126,7 +129,7 @@ function groupBySection(
 }
 
 export function NeutralShell({ children }: { children: ReactNode }) {
-  const { user, session } = useAuth();
+  const { user, session, logout } = useAuth();
   const userPermissions = user?.roles ?? [];
   const [sidebarOpen, setSidebarOpen] = useState(false);
   const closeSidebar = () => setSidebarOpen(false);
@@ -225,12 +228,31 @@ export function NeutralShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
-            <div className="flex items-center gap-2 text-sm text-muted-foreground">
-              <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
-                {userName.charAt(0).toUpperCase()}
-              </div>
-              <span className="hidden lg:inline text-foreground font-medium">{userName}</span>
-            </div>
+            <DropdownMenu>
+              <DropdownMenuTrigger className="focus:outline-none">
+                <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors p-1.5 rounded-lg hover:bg-muted/50">
+                  <div className="flex h-8 w-8 items-center justify-center rounded-full bg-muted text-sm font-medium text-foreground">
+                    {userName.charAt(0).toUpperCase()}
+                  </div>
+                  <span className="hidden lg:inline text-foreground font-medium">{userName}</span>
+                </div>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-56">
+                <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem asChild>
+                  <Link href="/perfil" className="flex items-center gap-2 cursor-pointer w-full">
+                    <User className="h-4 w-4" />
+                    <span>Mi Perfil</span>
+                  </Link>
+                </DropdownMenuItem>
+                <DropdownMenuSeparator />
+                <DropdownMenuItem onClick={logout} className="flex items-center gap-2 cursor-pointer text-red-600 focus:text-red-600 focus:bg-red-50">
+                  <LogOut className="h-4 w-4" />
+                  <span>Cerrar Sesión</span>
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
           </div>
         </header>
 

@@ -11,7 +11,6 @@ import (
 	"github.com/labstack/echo/v4"
 
 	httpadapter "users-service/internal/adapters/in/http"
-	"users-service/internal/adapters/out/email"
 	postgres "users-service/internal/adapters/out/postgres"
 	"users-service/internal/usecases"
 	portout "users-service/internal/ports/out"
@@ -36,22 +35,8 @@ func main() {
 	userRepo := postgres.NewUserRepo(db)
 	roleRepo := postgres.NewRoleRepo(db)
 	passwordResetRepo := postgres.NewPasswordResetRepo(db)
-	// Email service: use Resend if RESEND_API_KEY is set, otherwise log-only
-	templatesDir := os.Getenv("EMAIL_TEMPLATES_DIR")
-	tmplRenderer := email.NewTemplateEngine(templatesDir)
-
-	var emailSvc portout.EmailService
-	if apiKey := os.Getenv("RESEND_API_KEY"); apiKey != "" {
-		from := os.Getenv("RESEND_FROM")
-		if from == "" {
-			from = "onboarding@resend.dev"
-		}
-		emailSvc = email.NewResendEmailService(apiKey, from)
-		logger.Println("using Resend email service")
-	} else {
-		emailSvc = email.NewLogEmailService()
-		logger.Println("using Log email service (dev mode)")
-	}
+	// Email service: disabled for generic template mode
+	var emailSvc portout.EmailService = nil
 
 	frontendURL := os.Getenv("FRONTEND_URL")
 	if frontendURL == "" {
@@ -65,7 +50,7 @@ func main() {
 		usecases.WithRoleRepository(roleRepo),
 		usecases.WithPasswordResetRepository(passwordResetRepo),
 		usecases.WithEmailService(emailSvc),
-		usecases.WithTemplateRenderer(tmplRenderer),
+		usecases.WithTemplateRenderer(nil),
 		usecases.WithFrontendURL(frontendURL),
 		usecases.WithLogoURL(logoURL),
 	)

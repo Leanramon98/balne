@@ -134,19 +134,7 @@ export default function UsersTab() {
     } catch { alert('Error al eliminar usuarios'); }
   };
 
-  const handleBulkResendWelcome = async () => {
-    if (!window.confirm(`¿Reenviar correo de bienvenida a ${selectedIds.size} usuario(s)? Se generará una nueva contraseña para cada uno.`)) return;
-    try {
-      const headers = getAuthHeaders();
-      await Promise.all(
-        Array.from(selectedIds).map(id =>
-          fetch(`/api/users/users/${id}/restore-password`, { method: 'POST', headers })
-        )
-      );
-      setSelectedIds(new Set());
-      alert(`Correo de bienvenida reenviado a ${selectedIds.size} usuario(s).`);
-    } catch { alert('Error al reenviar correos'); }
-  };
+
 
   const openCreate = () => {
     setEditingUser(null);
@@ -182,18 +170,7 @@ export default function UsersTab() {
     }
   };
 
-  const handleRestorePassword = async (u: any) => {
-    const id = u.ID || u.id;
-    const name = u.full_name || u.FullName || u.fullName || u.email || u.Email || 'usuario';
-    if (!window.confirm(`¿Reenviar correo de bienvenida a "${name}"? Se generará una nueva contraseña.`)) return;
-    try {
-      const headers = getAuthHeaders();
-      await fetch(`/api/users/users/${id}/restore-password`, { method: 'POST', headers });
-      alert(`Contraseña restaurada para ${name}. El usuario recibirá un correo con las instrucciones.`);
-    } catch {
-      alert(`Funcionalidad no disponible: Restaurar contraseña para ${name}. Contactá al administrador del sistema.`);
-    }
-  };
+
 
   const handleDeleteUser = async (u: any) => {
     const id = u.ID || u.id;
@@ -253,9 +230,6 @@ export default function UsersTab() {
             <Button size="sm" variant="outline" className="border-red-400 text-red-700 hover:bg-red-50" onClick={handleBulkDelete}>
               <Trash2 className="mr-1 h-4 w-4" />Eliminar
             </Button>
-            <Button size="sm" variant="outline" className="border-blue-400 text-blue-700 hover:bg-blue-50" onClick={handleBulkResendWelcome}>
-              <Mail className="mr-1 h-4 w-4" />Reenviar correo
-            </Button>
           </div>
         )}
         {isLoading ? (
@@ -314,9 +288,6 @@ export default function UsersTab() {
                           <Button variant="ghost" size="icon" title="Editar" onClick={() => openEdit(u)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="ghost" size="icon" title="Reenviar correo de bienvenida" onClick={() => handleRestorePassword(u)}>
-                            <KeyRound className="h-4 w-4" />
-                          </Button>
                           <Button variant="ghost" size="icon" title="Eliminar" onClick={() => handleDeleteUser(u)}>
                             <Trash2 className="h-4 w-4 text-red-500" />
                           </Button>
@@ -325,7 +296,6 @@ export default function UsersTab() {
                           <div className="mt-2 p-3 bg-gray-50 rounded-md text-xs space-y-1">
                             <p><strong>ID:</strong> {userId}</p>
                             <p><strong>Teléfono:</strong> {u.phone || u.Phone || u.telefono || u.Telefono || '-'}</p>
-                            <p><strong>Cargo:</strong> {u.position || u.Position || u.cargo || u.Cargo || '-'}</p>
                             <p><strong>Creado:</strong> {fmtDate(u)}</p>
                             <p><strong>Actualizado:</strong> {u.updated_at || u.UpdatedAt ? fmtDate({ CreatedAt: u.updated_at || u.UpdatedAt }) : '-'}</p>
                           </div>
@@ -361,7 +331,6 @@ function UserForm({ user, onSaved }: {
   const [isActive, setIsActive] = useState(user?.is_active ?? user?.IsActive ?? true);
   const [fullName, setFullName] = useState(user?.full_name || user?.FullName || user?.fullName || '');
   const [email, setEmail] = useState(user?.email || user?.Email || '');
-  const [position, setPosition] = useState(user?.position || user?.Position || user?.cargo || user?.Cargo || '');
   const [phone, setPhone] = useState(user?.phone || user?.Phone || user?.telefono || user?.Telefono || '');
   const [password, setPassword] = useState(user ? '' : generatePassword());
   const [saving, setSaving] = useState(false);
@@ -382,11 +351,13 @@ function UserForm({ user, onSaved }: {
         email: email.trim(),
         role_id: roleId,
         is_active: isActive,
-        position: position.trim() || undefined,
         phone: phone.trim() || undefined,
       };
 
       if (user) {
+        if (password) {
+          body.password = password;
+        }
         await fetch(`/api/users/users/${user.id || user.ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...headers },
@@ -447,16 +418,48 @@ function UserForm({ user, onSaved }: {
       </div>
 
       <div className="space-y-2">
-        <Label>Cargo</Label>
-        <Input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Director de TI" />
-      </div>
-
-      <div className="space-y-2">
         <Label>Teléfono</Label>
         <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+54 11 1234-5678" />
       </div>
 
-      {!user && (
+      {user ? (
+        <div className="space-y-2 border-t pt-4">
+          <Label>Seguridad</Label>
+          {password ? (
+            <div className="space-y-2">
+              <div className="flex gap-2">
+                <Input value={password} readOnly className="font-mono text-sm bg-gray-50" />
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setPassword(generatePassword())}
+                  className="shrink-0"
+                >
+                  Regenerar
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={() => setPassword('')}
+                  className="shrink-0 text-red-500"
+                >
+                  Cancelar
+                </Button>
+              </div>
+              <p className="text-xs text-amber-600 font-medium">Copiala antes de guardar — no se mostrará después y se forzará al usuario a cambiarla.</p>
+            </div>
+          ) : (
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setPassword(generatePassword())}
+              className="w-full"
+            >
+              Generar nueva contraseña
+            </Button>
+          )}
+        </div>
+      ) : (
         <div className="space-y-2">
           <Label>Contraseña (generada automáticamente)</Label>
           <div className="flex gap-2">

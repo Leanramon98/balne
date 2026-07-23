@@ -32,7 +32,7 @@ export async function POST(req: NextRequest) {
   const response = NextResponse.json(data, { status: upstream.status });
   response.cookies.set('auto_insight_first_login', '0', {
     httpOnly: true,
-    secure: process.env.NODE_ENV === 'production',
+    secure: false, // Set to false to support local HTTP development/testing
     sameSite: 'strict',
     path: '/',
     maxAge: 0, // delete immediately

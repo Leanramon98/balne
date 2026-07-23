@@ -1,9 +1,15 @@
 import React from 'react';
-import type { IndicatorMessage } from '@/types';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { es } from 'date-fns/locale';
+
+export interface IndicatorMessage {
+  created_at?: string;
+  user_avatar?: string;
+  user_name?: string;
+  message?: string;
+}
 
 interface MessageItemProps {
   message: IndicatorMessage;

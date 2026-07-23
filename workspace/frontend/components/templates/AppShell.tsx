@@ -31,7 +31,6 @@ const MAIN_NAV_ITEMS = [
 const ADMIN_NAV_ITEMS = [
   { href: '/user', label: 'Usuarios', icon: Users },
   { href: '/role', label: 'Roles', icon: Users },
-  { href: '/auditlog', label: 'Auditoría', icon: LayoutDashboard },
 ];
 
 export function AppShell({ children }: { children: React.ReactNode }) {

@@ -128,7 +128,12 @@ export default function LoginPage() {
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-white/5" />
 
         <div className="relative z-10 px-10 pt-10">
-          <img src="/logo.webp" alt="My Application" className="block h-16 w-auto" />
+          <div className="flex items-center gap-2 font-semibold text-xl text-white">
+            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-600 text-white text-base font-bold">
+              P
+            </div>
+            <span>Platform</span>
+          </div>
         </div>
 
         <div className="relative z-10 px-10 flex-1 flex flex-col justify-center">
@@ -161,6 +166,13 @@ export default function LoginPage() {
           onSubmit={handleSubmit}
           className="w-full max-w-md space-y-5 rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_24px_70px_rgba(4,9,39,0.08)]"
         >
+          <div className="lg:hidden flex items-center justify-center gap-2 font-semibold text-lg text-zinc-900 mb-6">
+            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-white text-sm font-bold">
+              P
+            </div>
+            <span>Platform</span>
+          </div>
+
           <div>
             <h1 className="text-3xl font-bold tracking-tight text-zinc-900">{t('page.login.title')}</h1>
             <p className="mt-2 text-sm leading-6 text-zinc-500">{t('page.login.subtitle')}</p>

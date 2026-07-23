@@ -32,5 +32,15 @@
   "page.login.forgot-password": "¿Olvidaste tu contraseña?",
   "page.login.invalid-credentials": "Credenciales inválidas",
   "page.login.signing-in": "Iniciando sesión...",
-  "page.login.sign-in": "Iniciar sesión"
+  "page.login.sign-in": "Iniciar sesión",
+  "page.login.espanol": "Español",
+  "page.login.portugues": "Português",
+  "page.login.hero-title": "Plataforma Base",
+  "page.login.hero-desc": "Un punto de partida sólido, seguro y escalable para construir tu próxima aplicación web.",
+  "page.login.feature-autodiagnostico": "Arquitectura Limpia",
+  "page.login.feature-autodiagnostico-desc": "Estructura hexagonal y modular para facilitar la mantenibilidad y el crecimiento.",
+  "page.login.feature-colaborativa": "Acceso y Seguridad",
+  "page.login.feature-colaborativa-desc": "Control de accesos basado en roles (RBAC) y logs de auditoría nativos.",
+  "page.login.feature-plan": "Despliegue Rápido",
+  "page.login.feature-plan-desc": "Preparado con Docker y microservicios listos para desarrollo y producción."
 }

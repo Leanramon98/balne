@@ -89,11 +89,23 @@ func (l *Logic) UpdateUser(ctx context.Context, req portin.UpdateUserRequest) (p
 	if req.Body == nil {
 		return portin.UpdateUserResponse{}, errors.New("user body is required")
 	}
-	req.Body.UpdatedAt = time.Now()
-	if err := l.users.Update(ctx, req.Body); err != nil {
+	entity := req.Body
+	entity.UpdatedAt = time.Now()
+
+	if entity.Password != "" {
+		hash, err := bcrypt.GenerateFromPassword([]byte(entity.Password), bcrypt.DefaultCost)
+		if err != nil {
+			return portin.UpdateUserResponse{}, err
+		}
+		entity.PasswordHash = string(hash)
+		entity.Password = "" // clear plaintext
+		entity.FirstLogin = true // force password change
+	}
+
+	if err := l.users.Update(ctx, entity); err != nil {
 		return portin.UpdateUserResponse{}, err
 	}
-	return portin.UpdateUserResponse{Item: req.Body}, nil
+	return portin.UpdateUserResponse{Item: entity}, nil
 }
 
 func (l *Logic) DeleteUser(ctx context.Context, req portin.DeleteUserRequest) (portin.DeleteUserResponse, error) {

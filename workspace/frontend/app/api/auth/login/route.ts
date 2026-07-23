@@ -79,7 +79,7 @@ export async function POST(req: NextRequest) {
 
     const cookieOptions = {
       httpOnly: true,
-      secure: process.env.NODE_ENV === 'production',
+      secure: false, // Set to false to support local HTTP development/testing
       sameSite: 'strict' as const,
       path: '/',
       maxAge: 60 * 60 * 24 * 7, // 1 week
