@@ -72,12 +72,12 @@ func (l *Logic) PostUsers(ctx context.Context, req portin.PostUsersRequest) (por
 		if tmplErr != nil {
 			log.Printf("PostUsers: failed to render welcome email template: %v", tmplErr)
 			body = "Hola " + entity.FullName + ",\n\n" +
-				"Tu cuenta en la Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI ha sido creada.\n\n" +
+				"Tu cuenta en My Application ha sido creada.\n\n" +
 				"Email: " + entity.Email + "\n" +
 				"Contraseña: " + plainPassword + "\n\n" +
 				"Te recomendamos cambiar tu contraseña después de iniciar sesión."
 		}
-		if err := l.emailSvc.SendEmail(entity.Email, "Bienvenido a Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI - tus credenciales", body); err != nil {
+		if err := l.emailSvc.SendEmail(entity.Email, "Bienvenido a My Application - tus credenciales", body); err != nil {
 			log.Printf("PostUsers: failed to send welcome email to %s: %v", entity.Email, err)
 		}
 	}

@@ -45,7 +45,7 @@ CREATE TABLE IF NOT EXISTS users_service."user" (
   , fullname VARCHAR(255) NOT NULL
   , roleid UUID NOT NULL
   , isactive TEXT NOT NULL
-  , destinationid UUID NOT NULL
+  , organizationid UUID NOT NULL
   , createdat TIMESTAMP NOT NULL
   , updatedat TIMESTAMP NOT NULL
   , firstlogin BOOLEAN NOT NULL DEFAULT TRUE
@@ -70,7 +70,7 @@ CREATE TABLE IF NOT EXISTS users_service.loginresponse (
   token VARCHAR(255) NOT NULL
   , "user" UUID NOT NULL
   , role VARCHAR(255) NOT NULL
-  , destinationid UUID NOT NULL
+  , organizationid UUID NOT NULL
   , permissions TEXT NOT NULL
 );
 
@@ -98,111 +98,3 @@ CREATE TABLE IF NOT EXISTS users_service.auditlog (
 
 
 
--- Schema for evaluations-service
-CREATE SCHEMA IF NOT EXISTS evaluations_service;
-
-CREATE TABLE IF NOT EXISTS evaluations_service.healthresponse (
-  status VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.rootresponse (
-  message VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.subnationallevel (
-  id UUID PRIMARY KEY NOT NULL
-  , country VARCHAR(255) NOT NULL
-  , name VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.destinationtypology (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.populationrange (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.region (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , description VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.membertype (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.responsiblearea (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , description VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.axislevel (
-  id UUID PRIMARY KEY NOT NULL
-  , axis VARCHAR(255) NOT NULL
-  , objectivepercent TEXT NOT NULL
-  , sortorder INTEGER NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.scope (
-  id UUID PRIMARY KEY NOT NULL
-  , axis VARCHAR(255) NOT NULL
-  , acronym VARCHAR(255) NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , description VARCHAR(255) NOT NULL
-  , icon VARCHAR(255) NOT NULL
-  , sortorder INTEGER NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.requirement (
-  id UUID PRIMARY KEY NOT NULL
-  , scopeid UUID NOT NULL
-  , code VARCHAR(255) NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , description VARCHAR(255) NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.indicator (
-  id UUID PRIMARY KEY NOT NULL
-  , requirementid UUID NOT NULL
-  , code VARCHAR(255) NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , description VARCHAR(255) NOT NULL
-  , type VARCHAR(255) NOT NULL
-  , criteria TEXT NOT NULL
-  , createdat TIMESTAMP NOT NULL
-  , updatedat TIMESTAMP NOT NULL
-);
-
-
-CREATE TABLE IF NOT EXISTS evaluations_service.destination (
-  id UUID PRIMARY KEY NOT NULL
-  , name VARCHAR(255) NOT NULL
-  , country VARCHAR(255) NOT NULL
-  , subnationallevelid UUID NOT NULL
-  , typologyid UUID NOT NULL
-  , populationrangeid UUID NOT NULL
-  , regionid UUID NOT NULL
-  , membertypeid UUID NOT NULL
-  , lat TEXT NOT NULL
-  , lng TEXT NOT NULL
-  , isadhered TEXT NOT NULL
-  , createdat TIMESTAMP NOT NULL
-  , updatedat TIMESTAMP NOT NULL
-);

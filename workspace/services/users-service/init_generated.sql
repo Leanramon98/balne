@@ -29,7 +29,7 @@ CREATE TABLE IF NOT EXISTS loginresponse (
   , user UUID NOT NULL,
   FOREIGN KEY (user) REFERENCES user(id)
   , role VARCHAR(255) NOT NULL
-  , destinationid UUID NOT NULL
+  , organizationid UUID NOT NULL
   , permissions TEXT NOT NULL
 );
 
@@ -89,7 +89,7 @@ CREATE TABLE IF NOT EXISTS user (
   , roleid UUID NOT NULL,
   FOREIGN KEY (roleid) REFERENCES role(id)
   , isactive TEXT NOT NULL
-  , destinationid UUID NOT NULL
+  , organizationid UUID NOT NULL
   , createdat TIMESTAMP NOT NULL
   , updatedat TIMESTAMP NOT NULL
 );

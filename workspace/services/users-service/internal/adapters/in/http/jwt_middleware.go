@@ -13,28 +13,9 @@ import (
 // JWTSecret should be loaded from env in production
 var JWTSecret = []byte("change-me-in-production")
 
-// PermissionClaims are the DTI permission claims embedded in the JWT.
-type PermissionClaims struct {
-	AccessScope             string   `json:"access_scope"`
-	CanWriteValues          bool     `json:"can_write_values"`
-	CanManageUsers          bool     `json:"can_manage_users"`
-	CanApproveGoodPractices bool     `json:"can_approve_good_practices"`
-	EvaluationTypes         []string `json:"evaluation_types"`
-}
-
-// ExtendedClaims represents the JWT token claims for DTI profiles.
-type ExtendedClaims struct {
-	UserID        string           `json:"user_id"`
-	Email         string           `json:"email"`
-	FullName      string           `json:"full_name"`
-	Role          string           `json:"role"`
-	DestinationID *string          `json:"destination_id,omitempty"`
-	Permissions   PermissionClaims `json:"permissions"`
-	jwt.RegisteredClaims
-}
 
 // NeutralClaims represents the neutral tenant-aware JWT claims for the reusable base.
-// These claims carry tenant context without DTI-specific fields.
+// These claims carry tenant context.
 type NeutralClaims struct {
 	SubjectID      string `json:"sub"`
 	SessionID      string `json:"sid"`
@@ -44,26 +25,6 @@ type NeutralClaims struct {
 	jwt.RegisteredClaims
 }
 
-// LoginClaims is a combined claims struct used during login signing.
-// It embeds both neutral and legacy DTI fields for dual-mode backward compatibility.
-type LoginClaims struct {
-	// Neutral claims
-	SubjectID      string `json:"sub,omitempty"`
-	SessionID      string `json:"sid,omitempty"`
-	OrganizationID string `json:"org_id,omitempty"`
-	MembershipID   string `json:"mem_id,omitempty"`
-	DeploymentMode string `json:"deployment_mode,omitempty"`
-
-	// Legacy DTI claims
-	UserID        string            `json:"user_id,omitempty"`
-	Email         string            `json:"email,omitempty"`
-	FullName      string            `json:"full_name,omitempty"`
-	Role          string            `json:"role,omitempty"`
-	DestinationID *string           `json:"destination_id,omitempty"`
-	Permissions   *PermissionClaims `json:"permissions,omitempty"`
-
-	jwt.RegisteredClaims
-}
 
 // Claims represents the JWT token claims (legacy fallback).
 type Claims struct {

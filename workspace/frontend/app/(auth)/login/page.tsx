@@ -128,7 +128,7 @@ export default function LoginPage() {
         <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-white/5" />
 
         <div className="relative z-10 px-10 pt-10">
-          <img src="/dti-logo.webp" alt="DTI" className="block h-16 w-auto" />
+          <img src="/logo.webp" alt="My Application" className="block h-16 w-auto" />
         </div>
 
         <div className="relative z-10 px-10 flex-1 flex flex-col justify-center">

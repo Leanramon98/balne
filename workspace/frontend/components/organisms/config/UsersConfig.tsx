@@ -2,7 +2,6 @@
 
 import React, { useState } from 'react';
 import useSWR from 'swr';
-import { getDestinations } from '@/sdk/api/evaluations-api';
 import { getRoles } from '@/sdk/api/users-api';
 import { useAuthHeaders } from '@/sdk/hooks/useAuthHeaders';
 import { Button } from '@/components/ui/button';
@@ -27,7 +26,6 @@ import {
   Eye, KeyRound, CheckSquare, XSquare, Mail,
 } from 'lucide-react';
 
-// ========== Users Tab (F2-06, F2-07) ==========
 export default function UsersTab() {
   const getAuthHeaders = useAuthHeaders();
 
@@ -42,13 +40,6 @@ export default function UsersTab() {
     });
   });
 
-  // Load destinations to resolve destination_id → name in the table
-  const { data: dests } = useSWR('users-config-destinations', () => getDestinations());
-  const destMap = new Map(
-    (Array.isArray(dests) ? dests : []).map((d: any) => [d.id, d.name])
-  );
-
-  // Load roles to resolve role_id → name in the table
   const { data: roleList } = useSWR('users-config-roles', () => getRoles());
   const roleMap = new Map(
     (Array.isArray(roleList) ? roleList : []).map((r: any) => [r.ID, r.Name])
@@ -94,7 +85,6 @@ export default function UsersTab() {
               email: u.email || u.Email,
               role_id: u.role_id || u.RoleID || u.roleId,
               is_active: true,
-              ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
             }),
           });
         })
@@ -121,7 +111,6 @@ export default function UsersTab() {
               email: u.email || u.Email,
               role_id: u.role_id || u.RoleID || u.roleId,
               is_active: false,
-              ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
             }),
           });
         })
@@ -177,7 +166,6 @@ export default function UsersTab() {
     if (!window.confirm(`¿${action} al usuario "${name}"?`)) return;
     try {
       const headers = getAuthHeaders();
-      // PUT with all fields — the backend skips password_hash when empty
       await fetch(`/api/users/users/${id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json', ...headers },
@@ -186,7 +174,6 @@ export default function UsersTab() {
           email: u.email || u.Email,
           role_id: u.role_id || u.RoleID || u.roleId,
           is_active: isActive,
-          ...((u.destination_id || u.DestinationID || u.destinationId) ? { destination_id: u.destination_id || u.DestinationID || u.destinationId } : {}),
         }),
       });
       mutate();
@@ -221,7 +208,6 @@ export default function UsersTab() {
     }
   };
 
-  /** Format creation date safely */
   const fmtDate = (u: any): string => {
     const raw = u.CreatedAt || u.created_at || u.createdAt;
     if (!raw) return '-';
@@ -245,7 +231,6 @@ export default function UsersTab() {
               </DialogHeader>
               <UserForm
                 user={editingUser}
-                destinations={null}
                 onSaved={() => { setUserDialogOpen(false); mutate(); }}
               />
             </DialogContent>
@@ -253,7 +238,6 @@ export default function UsersTab() {
         </div>
       </CardHeader>
       <CardContent className="p-0">
-        {/* Bulk actions bar */}
         {someSelected && (
           <div className="flex items-center gap-2 px-4 py-2 bg-blue-50 border-b border-blue-100">
             <span className="text-sm font-medium text-blue-800">
@@ -292,7 +276,6 @@ export default function UsersTab() {
                   <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Nombre</TableHead>
                   <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Email</TableHead>
                   <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Perfil</TableHead>
-                  <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Destino</TableHead>
                   <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Alta/Baja</TableHead>
                   <TableHead className="bg-zinc-50 text-zinc-500 text-[12px] font-semibold uppercase tracking-[0.02em] py-3 px-4 border-b border-zinc-200">Acciones</TableHead>
                 </TableRow>
@@ -317,7 +300,6 @@ export default function UsersTab() {
                           {roleMap.get(u.role_id || u.RoleID || u.roleId) || u.role_id || u.RoleID || u.roleId || '-'}
                         </Badge>
                       </TableCell>
-                      <TableCell className="text-sm">{destMap.get(u.destination_id) || u.destination_id || '-'}</TableCell>
                       <TableCell>
                         <Switch
                           checked={u.IsActive !== false && u.is_active !== false}
@@ -361,8 +343,6 @@ export default function UsersTab() {
   );
 }
 
-// ========== User Form (inline, used by UsersTab) ==========
-
 function generatePassword(): string {
   const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789!@#$%';
   let pwd = '';
@@ -372,31 +352,20 @@ function generatePassword(): string {
   return pwd;
 }
 
-function UserForm({ user, destinations, onSaved }: {
+function UserForm({ user, onSaved }: {
   user: any;
-  destinations: any[] | null;
   onSaved: () => void;
 }) {
   const getAuthHeaders = useAuthHeaders();
-  // NOTE: Go backend serializes with snake_case keys (full_name, role_id, destination_id)
   const [roleId, setRoleId] = useState(user?.role_id || user?.RoleID || user?.roleId || '');
   const [isActive, setIsActive] = useState(user?.is_active ?? user?.IsActive ?? true);
   const [fullName, setFullName] = useState(user?.full_name || user?.FullName || user?.fullName || '');
   const [email, setEmail] = useState(user?.email || user?.Email || '');
-  const [destinationId, setDestinationId] = useState(user?.destination_id || user?.DestinationID || user?.destinationId || '');
   const [position, setPosition] = useState(user?.position || user?.Position || user?.cargo || user?.Cargo || '');
   const [phone, setPhone] = useState(user?.phone || user?.Phone || user?.telefono || user?.Telefono || '');
   const [password, setPassword] = useState(user ? '' : generatePassword());
   const [saving, setSaving] = useState(false);
 
-  // Load destinations if not provided
-  const { data: dests } = useSWR(
-    destinations ? null : 'user-form-destinations',
-    () => getDestinations(),
-  );
-  const destList = destinations || dests || [];
-
-  // Load roles from API (use role UUID as value, role name as label)
   const { data: roleList } = useSWR('user-form-roles', () => getRoles());
   const roles = roleList || [];
 
@@ -408,7 +377,6 @@ function UserForm({ user, destinations, onSaved }: {
     setSaving(true);
     try {
       const headers = getAuthHeaders();
-
       const body: Record<string, unknown> = {
         full_name: fullName.trim(),
         email: email.trim(),
@@ -416,30 +384,23 @@ function UserForm({ user, destinations, onSaved }: {
         is_active: isActive,
         position: position.trim() || undefined,
         phone: phone.trim() || undefined,
-        destination_id: destinationId || undefined,
       };
 
       if (user) {
-        // Edit existing user
         await fetch(`/api/users/users/${user.id || user.ID}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json', ...headers },
           body: JSON.stringify(body),
         });
       } else {
-        // Create new user
         body.password = password;
-        console.log('[UsersConfig] POST /api/users/users body:', JSON.stringify(body, null, 2));
         const res = await fetch('/api/users/users', {
           method: 'POST',
           headers,
           body: JSON.stringify(body),
         });
-        console.log('[UsersConfig] POST /api/users/users status:', res.status);
-        const resText = await res.text();
-        console.log('[UsersConfig] POST /api/users/users response:', resText);
         if (!res.ok) {
-          throw new Error(`Server error: ${res.status} - ${resText}`);
+          throw new Error(`Server error: ${res.status}`);
         }
       }
       onSaved();
@@ -452,7 +413,6 @@ function UserForm({ user, destinations, onSaved }: {
 
   return (
     <div className="space-y-4 py-4">
-      {/* Perfil (Select) */}
       <div className="space-y-2">
         <Label>Perfil</Label>
         <Select value={roleId} onValueChange={setRoleId}>
@@ -465,7 +425,6 @@ function UserForm({ user, destinations, onSaved }: {
         </Select>
       </div>
 
-      {/* Estado */}
       <div className="space-y-2">
         <Label>Estado</Label>
         <Select value={isActive ? 'alta' : 'baja'} onValueChange={(v) => setIsActive(v === 'alta')}>
@@ -477,44 +436,26 @@ function UserForm({ user, destinations, onSaved }: {
         </Select>
       </div>
 
-      {/* Nombre */}
       <div className="space-y-2">
         <Label>Nombre *</Label>
         <Input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Nombre completo" />
       </div>
 
-      {/* Email */}
       <div className="space-y-2">
         <Label>Email *</Label>
         <Input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="email@ejemplo.com" />
       </div>
 
-      {/* Destino */}
-      <div className="space-y-2">
-        <Label>Destino (opcional según perfil)</Label>
-        <Select value={destinationId} onValueChange={setDestinationId}>
-          <SelectTrigger><SelectValue placeholder="Sin destino asignado" /></SelectTrigger>
-          <SelectContent>
-            {destList.map((d: any) => (
-              <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* Cargo */}
       <div className="space-y-2">
         <Label>Cargo</Label>
         <Input value={position} onChange={(e) => setPosition(e.target.value)} placeholder="Ej: Director de TI" />
       </div>
 
-      {/* Teléfono */}
       <div className="space-y-2">
         <Label>Teléfono</Label>
         <Input value={phone} onChange={(e) => setPhone(e.target.value)} placeholder="+54 11 1234-5678" />
       </div>
 
-      {/* Contraseña (solo creación) */}
       {!user && (
         <div className="space-y-2">
           <Label>Contraseña (generada automáticamente)</Label>

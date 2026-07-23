@@ -27,7 +27,6 @@ type LoginResponse struct {
 	Token         string        `json:"token"`
 	User          uuid.UUID     `json:"user"`
 	Role          string        `json:"role"`
-	DestinationID *uuid.UUID    `json:"destination_id,omitempty"`
 	Permissions   PermissionSet `json:"permissions"`
 	FirstLogin    bool          `json:"first_login"`
 
@@ -74,7 +73,7 @@ type User struct {
 	FullName      string     `json:"full_name"`
 	Phone         string     `json:"phone,omitempty"`
 	RoleID        uuid.UUID  `json:"role_id"`
-	DestinationID *uuid.UUID `json:"destination_id,omitempty"`
+	OrganizationID *uuid.UUID `json:"organization_id,omitempty"`
 	IsActive      bool       `json:"is_active"`
 	FirstLogin    bool       `json:"first_login"`
 	Password      string     `json:"password,omitempty"` // input-only: plain text password for user creation

@@ -52,32 +52,6 @@ services:
     networks:
       - auto-insight-net
 
-  evaluations-service:
-    build:
-      context: ../services/evaluations-service
-      dockerfile: Dockerfile
-    environment:
-      - PORT=8082
-      - DB_URL=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable&search_path=evaluations_service&options=-c%20client_encoding%3DUTF8
-      - DEEPL_API_KEY=${DEEPL_API_KEY:-}
-      
-      - OTEL_EXPORTER_OTLP_ENDPOINT=otel-collector:4317
-      - OTEL_SERVICE_NAME=evaluations-service
-      
-    depends_on:
-      postgres:
-        condition: service_healthy
-      
-    healthcheck:
-      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8082/health"]
-      interval: 10s
-      timeout: 5s
-      retries: 10
-      start_period: 10s
-    networks:
-      - auto-insight-net
-
-
 
   rabbitmq:
     image: rabbitmq:3.12-management
@@ -101,8 +75,6 @@ services:
     volumes:
       - postgres_data:/var/lib/postgresql/data
       - ./init_generated.sql:/docker-entrypoint-initdb.d/init_generated.sql
-      - ./init_zz_evaluations.sql:/docker-entrypoint-initdb.d/init_zz_evaluations.sql
-      - ./init_zzz_seed_data.sql:/docker-entrypoint-initdb.d/init_zzz_seed_data.sql
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -170,7 +142,7 @@ services:
   # Frontend — Next.js (BFF pattern)
   # ============================================================================
   frontend:
-    image: ghcr.io/ciudades-del-futuro/dti-assessment/frontend
+    image: ghcr.io/my-org/my-app/frontend
     build:
       context: ../frontend
       dockerfile: Dockerfile

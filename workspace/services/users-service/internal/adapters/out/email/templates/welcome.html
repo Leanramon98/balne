@@ -5,13 +5,21 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <meta name="color-scheme" content="light">
   <meta name="supported-color-schemes" content="light">
-  <title>Bienvenido a Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI</title>
+  <title>Bienvenido a My Application</title>
+  <style>
+    /* Reset & Typography */
+    body { margin: 0; padding: 0; background-color: #f8fafc; font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; -webkit-font-smoothing: antialiased; }
+    table { border-spacing: 0; border-collapse: collapse; }
+    td { padding: 0; }
+    img { border: 0; }
+    a { text-decoration: none; }
+  </style>
 </head>
-<body style="margin:0; padding:0; background-color:#040927; font-family:-apple-system,'Segoe UI',Roboto,Helvetica,Arial,sans-serif; -webkit-font-smoothing:antialiased;">
+<body style="margin:0; padding:0; background-color:#f8fafc;">
 
-  <!-- Preheader -->
-  <div style="display:none; max-height:0; overflow:hidden; opacity:0; color:transparent; font-size:1px; line-height:1px;">
-    Tu cuenta en la Red Iberoamericana DTI ya está lista. Ingresá con tus credenciales y comenzá.
+  <!-- Preview Text -->
+  <div style="display:none; max-height:0px; overflow:hidden;">
+    Tu cuenta en My Application ya está lista. Ingresá con tus credenciales y comenzá.
   </div>
 
   <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#040927;">
@@ -24,13 +32,13 @@
             <td align="center" style="padding:52px 24px 108px;">
 
               <!-- Logo -->
-              <img src="https://evaluacionesdti.rediberoamericanadti.org/dti-logo.png" width="300" alt="Red Iberoamericana DTI" style="display:block; width:300px; max-width:80%; height:auto; margin:0 auto 24px;">
+              <img src="https://example.com/logo.png" width="300" alt="My Application" style="display:block; width:300px; max-width:80%; height:auto; margin:0 auto 24px;">
 
               <h1 style="color:#ffffff; font-size:28px; font-weight:800; letter-spacing:-0.6px; line-height:1.25; margin:0;">
-                Bienvenidos a la Plataforma de Autodiagnóstico
+                Bienvenidos a la Plataforma
               </h1>
               <p style="color:rgba(167,173,216,0.85); font-size:15px; line-height:1.6; margin:12px auto 0; max-width:420px;">
-                Red Iberoamericana de Destinos Turísticos Inteligentes.
+                My Application.
               </p>
 
             </td>
@@ -40,17 +48,16 @@
         <!-- CARD (overlapping) -->
         <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color:#eef0f4;">
           <tr>
-            <td align="center" style="padding:0 16px 40px;">
-
-              <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px; background-color:#ffffff; border-radius:18px; box-shadow:0 12px 40px rgba(4,9,39,0.28); margin-top:-72px;">
+            <td align="center" style="padding: 40px 20px;">
+              <div style="font-size: 24px; font-weight: bold; color: #0f172a; margin-bottom: 24px;">My Application</div>
+              
+              <table width="100%" cellpadding="0" cellspacing="0" style="width:560px; max-width:560px; background-color:#ffffff; border-radius:12px; box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);">
                 <tr>
-                  <td style="padding:38px 40px 12px;">
+                  <td style="padding: 40px;">
 
-                    <p style="color:#040927; font-size:16px; line-height:1.65; margin:0 0 6px; font-weight:600;">
-                      Hola {{.FullName}},
-                    </p>
-                    <p style="color:#52556a; font-size:14.5px; line-height:1.65; margin:0 0 26px;">
-                      Se creó una cuenta para vos en la <strong style="color:#040927;">Red Iberoamericana DTI</strong>. Usá estas credenciales para tu primer acceso.
+                    <h1 style="color:#0f172a; font-size:24px; font-weight:700; margin:0 0 16px; letter-spacing:-0.5px;">¡Hola!</h1>
+                    <p style="color:#475569; font-size:16px; line-height:24px; margin:0 0 24px;">
+                      Se creó una cuenta para vos en <strong style="color:#040927;">My Application</strong>. Usá estas credenciales para tu primer acceso.
                     </p>
 
                     <!-- Email card -->
@@ -88,23 +95,24 @@
                       <span style="color:#a8842a; font-weight:700;">Importante:</span> <span style="color:#6b5f42;">por seguridad, cambiá tu contraseña la primera vez que inicies sesión.</span>
                     </p>
 
-                    <p style="color:#9297ad; font-size:12px; line-height:1.6; margin:22px 0 0; text-align:center; border-top:1px solid #eceef3; padding-top:22px;">
-                      Si no solicitaste esta cuenta, ignorá este mensaje.
-                    </p>
-
                   </td>
                 </tr>
               </table>
 
               <!-- Footer -->
-              <table role="presentation" width="560" cellpadding="0" cellspacing="0" border="0" style="width:560px; max-width:560px;">
+              <table role="presentation" width="560" cellpadding="0" cellspacing="0" style="width:560px; max-width:560px;">
                 <tr>
-                  <td style="padding:26px 24px 0; text-align:center;">
-                    <p style="color:#6d7290; font-size:12px; font-weight:700; margin:0 0 3px;">Red Iberoamericana DTI</p>
-                    <p style="color:#9297ad; font-size:11px; line-height:1.6; margin:0;">
-                      Plataforma de Autodiagnóstico de Destinos Turísticos Inteligentes<br>
-                      Mensaje automático · No respondas a este correo · © 2026
-                    </p>
+                  <td align="center" style="padding: 32px 20px; border-top: 1px solid #e2e8f0;">
+                    <table width="100%" cellpadding="0" cellspacing="0">
+                      <tr>
+                        <td align="center">
+                          <p style="color:#6d7290; font-size:12px; font-weight:700; margin:0 0 3px;">My Application</p>
+                          <p style="color:#94a3b8; font-size:12px; line-height:18px; margin:0;">
+                            Este es un mensaje automático, por favor no respondas a este correo.
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
                   </td>
                 </tr>
               </table>

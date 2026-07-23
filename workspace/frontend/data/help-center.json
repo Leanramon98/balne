@@ -63,8 +63,8 @@
       "icon": "ClipboardList",
       "title_es": "Evaluaciones",
       "title_pt": "Avaliações",
-      "description_es": "Creá, gestioná y cerrá evaluaciones del ciclo DTI.",
-      "description_pt": "Crie, gerencie e encerre avaliações do ciclo DTI.",
+      "description_es": "Creá, gestioná y cerrá evaluaciones.",
+      "description_pt": "Crie, gerencie e encerre avaliações.",
       "order": 0,
       "steps": [
         {

@@ -8,24 +8,24 @@ import (
 	"github.com/google/uuid"
 )
 
-func TestUser_DestinationID(t *testing.T) {
-	// RED: Verify User can hold a nullable DestinationID
+func TestUser_OrganizationID(t *testing.T) {
+	// RED: Verify User can hold a nullable OrganizationID
 	destID := uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
 
 	t.Run("nil when not set", func(t *testing.T) {
 		u := User{ID: uuid.New()}
-		if u.DestinationID != nil {
-			t.Error("expected DestinationID to be nil by default")
+		if u.OrganizationID != nil {
+			t.Error("expected OrganizationID to be nil by default")
 		}
 	})
 
 	t.Run("set and read", func(t *testing.T) {
-		u := User{ID: uuid.New(), DestinationID: &destID}
-		if u.DestinationID == nil {
-			t.Fatal("expected DestinationID to be non-nil")
+		u := User{ID: uuid.New(), OrganizationID: &destID}
+		if u.OrganizationID == nil {
+			t.Fatal("expected OrganizationID to be non-nil")
 		}
-		if *u.DestinationID != destID {
-			t.Errorf("got %v, want %v", *u.DestinationID, destID)
+		if *u.OrganizationID != destID {
+			t.Errorf("got %v, want %v", *u.OrganizationID, destID)
 		}
 	})
 }
@@ -75,7 +75,7 @@ func TestPermissionSet(t *testing.T) {
 
 	t.Run("JSON round-trip", func(t *testing.T) {
 		original := PermissionSet{
-			AccessScope:             "destination",
+			AccessScope:             "organization",
 			CanWriteValues:          true,
 			CanManageUsers:          true,
 			CanApproveGoodPractices: false,
@@ -245,29 +245,29 @@ func TestLoginResponse_Extended(t *testing.T) {
 	// RED: Verify LoginResponse includes new fields
 	userID := uuid.New()
 	destID := uuid.MustParse("a1b2c3d4-e5f6-7890-abcd-ef1234567890")
-	perms := PermissionSet{AccessScope: "destination"}
+	perms := PermissionSet{AccessScope: "organization"}
 
 	t.Run("has Role field", func(t *testing.T) {
-		r := LoginResponse{Role: "admin_destino"}
-		if r.Role != "admin_destino" {
-			t.Errorf("got %q, want 'admin_destino'", r.Role)
+		r := LoginResponse{Role: "admin_organization"}
+		if r.Role != "admin_organization" {
+			t.Errorf("got %q, want 'admin_organization'", r.Role)
 		}
 	})
 
-	t.Run("has nullable DestinationID", func(t *testing.T) {
-		r := LoginResponse{User: userID, DestinationID: &destID}
-		if r.DestinationID == nil {
-			t.Fatal("expected DestinationID to be non-nil")
+	t.Run("has nullable OrganizationID", func(t *testing.T) {
+		r := LoginResponse{User: userID, OrganizationID: &destID}
+		if r.OrganizationID == nil {
+			t.Fatal("expected OrganizationID to be non-nil")
 		}
-		if *r.DestinationID != destID {
-			t.Errorf("got %v, want %v", *r.DestinationID, destID)
+		if *r.OrganizationID != destID {
+			t.Errorf("got %v, want %v", *r.OrganizationID, destID)
 		}
 	})
 
 	t.Run("has Permissions", func(t *testing.T) {
 		r := LoginResponse{Permissions: perms}
-		if r.Permissions.AccessScope != "destination" {
-			t.Errorf("got %q, want 'destination'", r.Permissions.AccessScope)
+		if r.Permissions.AccessScope != "organization" {
+			t.Errorf("got %q, want 'organization'", r.Permissions.AccessScope)
 		}
 	})
 }

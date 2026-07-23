@@ -52,11 +52,11 @@ func (l *Logic) PostAuthLogin(ctx context.Context, req portin.PostAuthLoginReque
 
 	// 5. Parse permissions JSON into PermissionSet
 	ps := domain.PermissionSet{
-		AccessScope: "destination", // default
+		AccessScope: "organization", // default
 	}
 	if len(role.Permissions) > 0 {
 		if err := json.Unmarshal(role.Permissions, &ps); err != nil {
-			ps = domain.PermissionSet{AccessScope: "destination"}
+			ps = domain.PermissionSet{AccessScope: "organization"}
 		}
 	}
 
@@ -77,48 +77,28 @@ func (l *Logic) PostAuthLogin(ctx context.Context, req portin.PostAuthLoginReque
 		}
 	}
 
-	// 7. Build LoginClaims with combined neutral + legacy DTI fields
+	// 7. Build NeutralClaims
 	now := time.Now()
 	registered := jwt.RegisteredClaims{
 		ExpiresAt: jwt.NewNumericDate(now.Add(24 * time.Hour)),
 		IssuedAt:  jwt.NewNumericDate(now),
 	}
 
-	var destIDStr *string
-	if user.DestinationID != nil {
-		s := user.DestinationID.String()
-		destIDStr = &s
-	}
-
-	loginClaims := &httpadapter.LoginClaims{
+	sessionID := uuid.New()
+	loginClaims := &httpadapter.NeutralClaims{
 		RegisteredClaims: registered,
-		// Legacy DTI fields (always present)
-		UserID:        user.ID.String(),
-		Email:         user.Email,
-		FullName:      user.FullName,
-		Role:          role.Name,
-		DestinationID: destIDStr,
-		Permissions: &httpadapter.PermissionClaims{
-			AccessScope:             ps.AccessScope,
-			CanWriteValues:          ps.CanWriteValues,
-			CanManageUsers:          ps.CanManageUsers,
-			CanApproveGoodPractices: ps.CanApproveGoodPractices,
-			EvaluationTypes:         ps.EvaluationTypes,
-		},
+		SubjectID:        user.ID.String(),
+		SessionID:        sessionID.String(),
+		DeploymentMode:   deployMode,
 	}
 
-	// Add neutral claims when org/membership exists (dual mode)
 	if hasNeutral {
-		sessionID := uuid.New()
-		loginClaims.SubjectID = user.ID.String()
-		loginClaims.SessionID = sessionID.String()
 		if orgID != nil {
 			loginClaims.OrganizationID = orgID.String()
 		}
 		if memID != nil {
 			loginClaims.MembershipID = memID.String()
 		}
-		loginClaims.DeploymentMode = deployMode
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, loginClaims)
@@ -127,18 +107,11 @@ func (l *Logic) PostAuthLogin(ctx context.Context, req portin.PostAuthLoginReque
 		return portin.PostAuthLoginResponse{}, errors.New("failed to generate token")
 	}
 
-	// 8. Build LoginResponse with legacy DTI fields + neutral fields
-	var destID *uuid.UUID
-	if user.DestinationID != nil {
-		destID = user.DestinationID
-	}
-
 	resp := portin.PostAuthLoginResponse{
 		Item: &domain.LoginResponse{
 			Token:         tokenString,
 			User:          user.ID,
 			Role:          role.Name,
-			DestinationID: destID,
 			Permissions:   ps,
 			FirstLogin:    user.FirstLogin,
 			// Neutral tenant fields (dual mode)

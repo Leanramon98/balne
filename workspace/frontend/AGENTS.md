@@ -1,6 +1,6 @@
 # AGENTS.md — Frontend
 
-> Frontend-specific conventions for the Auto-Insight Next.js 15 application.
+> Frontend-specific conventions for the Project Template Next.js 15 application.
 
 ## Tech Stack
 
@@ -21,24 +21,23 @@ Components follow the Atomic Design hierarchy:
 ```
 components/
 ├── atoms/        ← Buttons, Inputs, Badges, Labels (reusable primitives)
-├── molecules/    ← FormField, FilterBar, IndicatorRow (atoms combined)
-├── organisms/    ← Tables, Forms, Detail views, ActionSelectorModal
-└── templates/    ← AppShell, DtiShell (page layouts)
+├── molecules/    ← FormField, FilterBar (atoms combined)
+├── organisms/    ← Tables, Forms, Detail views
+└── templates/    ← AppShell, NeutralShell (page layouts)
 ```
 
 ### Route Groups
 
 | Group | Layout | Purpose |
 |-------|--------|---------|
-| `(dti)` | `DtiShell` | Main DTI pages (evaluaciones, acciones, resultados, etc.) |
-| `(admin)` | `AppShell` | Deprecated — migrating to `(dti)` |
-| `(public)` | None | Public pages (login, buenas-practicas) |
-| `(auth)` | None | Auth pages (login) |
+| `(admin)` | `AppShell` | Admin dashboard pages |
+| `(public)` | None | Public pages (landing, etc.) |
+| `(auth)` | None | Auth pages (login, register) |
 
 ### BFF Pattern (Backend-for-Frontend)
 
 All API calls go through Next.js BFF routes:
-- **Client-side**: relative path `/api/evaluations/*` → Next.js rewrites → api-gateway
+- **Client-side**: relative path `/api/users/*` → Next.js rewrites → api-gateway
 - **Server-side**: `INTERNAL_GATEWAY_URL` env var → direct to api-gateway
 
 **Key rule**: NEVER call services directly from UI components. Always use `sdk/api/`.
@@ -47,9 +46,9 @@ All API calls go through Next.js BFF routes:
 
 ```
 sdk/
-├── api/          ← API clients (evaluations-api.ts, users-api.ts)
+├── api/          ← API clients (users-api.ts)
 ├── auth/         ← AuthContext, guards, JWT utilities
-└── hooks/        ← SWR hooks (useAuditLogs, useGoodPractices, etc.)
+└── hooks/        ← SWR hooks
 ```
 
 The BFF proxy is at `app/api/[...path]/route.ts`. It:
@@ -62,8 +61,6 @@ The BFF proxy is at `app/api/[...path]/route.ts`. It:
 - **SWR** for server state (fetching, caching, revalidation)
 - **React useState/useReducer** for local UI state
 - **No global state library** (no Redux, Zustand, etc.)
-
-SWR cache keys use arrays: `['indicator-value', evaluationId, indicatorId]`
 
 ## UI Conventions
 
@@ -78,7 +75,7 @@ import { Dialog, DialogContent } from '@/components/ui/dialog';
 
 ### Color Palette
 
-Follow the DTI design tokens (Tailwind v4 CSS variables):
+Follow the design tokens (Tailwind v4 CSS variables):
 - Primary: `blue-600`
 - Success: `green-500`/`green-600`
 - Warning: `amber-500`
@@ -107,23 +104,6 @@ CRUD tables should have:
 - Validation: inline checks before submit
 - Submit buttons show loading state (`saving ? 'Guardando...' : 'Guardar'`)
 
-## Domain-Specific Conventions
-
-### Destino (Destination)
-- Has `lat` and `lng` fields for map positioning
-- `is_adhered` boolean for adhesion status
-- Related to: `member_type_id`, `subnational_level_id`, `typology_id`, `population_range_id`, `region_id`
-
-### Evaluación (Evaluation)
-- States: `borrador` → `en_evaluacion` → `finalizada`
-- Types: `auto_evaluacion`, `evaluacion`, `re_evaluacion`
-- Users have `access_level`: `administracion`, `evaluador`, `observador`
-
-### Indicador (Indicator)
-- Types: `gradient` (0/25/50/75/100), `boolean` (Sí/No), `numeric`
-- Linked to actions via `action_indicator_link`
-- Values stored per evaluation (`destination_value`, `evaluator_value`)
-
 ## File Rules
 
 1. **Never import from `context/` or `lib/` at root** — use `sdk/hooks/` and `sdk/api/`
@@ -136,7 +116,6 @@ CRUD tables should have:
 
 - **E2E**: Playwright tests in `tests/e2e/`
 - **Unit**: Jest + React Testing Library
-- Test data cleanup: use API calls in `tests/e2e/fixtures/cleanup.ts`
 
 ## Dependencies
 
@@ -145,5 +124,3 @@ Key packages:
 - `sonner` — Toast notifications
 - `lucide-react` — Icons
 - `@radix-ui/*` — Primitives (via shadcn)
-- `react-leaflet` + `leaflet` — Maps (Mapa de Destinos)
-- `react-leaflet-cluster` — Marker clustering

@@ -23,12 +23,9 @@ import { Button } from '@/components/ui/button';
 import { ScrollArea } from '@/components/ui/scroll-area';
 import { Separator } from '@/components/ui/separator';
 
-const DTI_NAV_ITEMS = [
-  { href: '/evaluaciones', label: 'Evaluaciones', icon: ClipboardList },
-  { href: '/acciones', label: 'Acciones', icon: FileText },
-  { href: '/plan-transformacion', label: 'Plan DTI', icon: Target },
-  { href: '/resultados', label: 'Resultados', icon: BarChart3 },
-  { href: '/informes', label: 'Informes', icon: LayoutDashboard },
+const MAIN_NAV_ITEMS = [
+  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
+  { href: '/items', label: 'Items', icon: ClipboardList },
 ];
 
 const ADMIN_NAV_ITEMS = [
@@ -56,7 +53,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         <div className="flex h-14 items-center border-b px-4">
           <Link href="/" className="flex items-center gap-2 font-semibold text-lg">
             <Target className="h-5 w-5 text-blue-600" />
-            <span>DTI Admin</span>
+            <span>My Application</span>
           </Link>
           <Button variant="ghost" size="icon" className="ml-auto lg:hidden" onClick={() => setSidebarOpen(false)}>
             <X className="h-4 w-4" />
@@ -64,12 +61,12 @@ export function AppShell({ children }: { children: React.ReactNode }) {
         </div>
 
         <ScrollArea className="flex-1 px-3 py-2">
-          {/* DTI Navigation */}
+          {/* Main Navigation */}
           <p className="px-3 text-xs font-medium text-gray-400 uppercase tracking-wider mb-2">
-            DTI
+            Principal
           </p>
           <nav className="flex flex-col gap-1 mb-4">
-            {DTI_NAV_ITEMS.map((item) => {
+            {MAIN_NAV_ITEMS.map((item) => {
               const Icon = item.icon;
               const isActive = pathname?.startsWith(item.href);
               return (

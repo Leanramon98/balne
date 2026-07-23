@@ -1,17 +1,10 @@
-# AGENTS.md — Auto-Insight DTI Platform
+# AGENTS.md — Project Template
 
 > Global entry point for any AI agent working on this codebase. Read this first, then dive into the relevant sub-AGENTS.md.
 
 ## Project Overview
 
-**Auto-Insight** is a DTI (Destinos de Transformación Inteligente) assessment platform. It manages:
-- **Destinations** (cities/regions) with geographic coordinates, population ranges, member types
-- **Evaluations** — multi-phase assessment cycles (auto-evaluación → evaluación → re-evaluación)
-- **Scopes / Ámbitos** — assessment domains (GOB, INN, TEC, SOST, ACC)
-- **Indicators** — measurable criteria per scope, with gradient/boolean/numeric types
-- **Actions / Plan de Transformación** — improvement actions linked to indicators
-- **Good Practices / Buenas Prácticas** — public showcase of completed actions
-- **Results & Reports** — aggregated analytics across destinations
+**Project Template** is a clean, neutral starter kit for new web applications. It provides a full-stack foundation with Next.js, Go microservices, API Gateway, and PostgreSQL.
 
 ## Tech Stack
 
@@ -28,18 +21,16 @@
 ## Monorepo Structure
 
 ```
-auto-insight/
+project-base/
 ├── AGENTS.md                    ← You are here
 ├── workspace/
 │   ├── frontend/               ← Next.js app (see frontend/AGENTS.md)
-│   │   ├── app/(dti)/          ← Main DTI pages (DtiShell)
-│   │   ├── app/(admin)/        ← Admin pages (AppShell — deprecated, moving to dti)
+│   │   ├── app/(admin)/        ← Admin pages (AppShell)
 │   │   ├── app/(public)/       ← Public pages (no auth)
 │   │   ├── components/         ← Atomic Design hierarchy
 │   │   ├── sdk/                ← API clients, auth context, hooks
-│   │   └── lib/                ← Utilities (auth.ts, display-names.ts)
+│   │   └── lib/                ← Utilities
 │   ├── services/
-│   │   ├── evaluations-service/ ← Core business logic (see service/AGENTS.md)
 │   │   └── users-service/      ← Auth, RBAC, profiles (see service/AGENTS.md)
 │   ├── gateways/
 │   │   └── api-gateway/        ← Reverse proxy + JWT (see gateways/AGENTS.md)
@@ -64,27 +55,12 @@ This project uses SDD. Before implementing substantial changes:
 ```
 Browser → Next.js Frontend
         → BFF API Routes (App Router) → api-gateway (port 8080)
-                                        → evaluations-service (port 8082)
                                         → users-service (port 8081)
 ```
-
-## Domain Quick Reference
-
-| Term | English | Description |
-|------|---------|-------------|
-| **Destino** | Destination | City/region being assessed (has lat/lng, country, population) |
-| **Ámbito** | Scope | Assessment domain (GOB=governance, INN=innovation, TEC=technology, SOST=sustainability, ACC=accessibility) |
-| **Requisito** | Requirement | A requirement within a scope |
-| **Indicador** | Indicator | Measurable metric linked to a requirement |
-| **Evaluación** | Evaluation | Assessment cycle with states: borrador → en_evaluacion → finalizada |
-| **Acción** | Action | Improvement action in the transformation plan |
-| **Buena Práctica** | Good Practice | Publicly showcaseable completed action |
-| **Eje** | Axis | Top-level categorization (same values as scope) |
 
 ## Navigation
 
 - **Frontend conventions** → `workspace/frontend/AGENTS.md`
-- **Evaluations service** → `workspace/services/evaluations-service/AGENTS.md`
 - **Users service** → `workspace/services/users-service/AGENTS.md`
 - **API Gateway** → `workspace/gateways/api-gateway/AGENTS.md`
 - **Infrastructure** → `workspace/infra/AGENTS.md`
@@ -95,5 +71,4 @@ Browser → Next.js Frontend
 1. **Never edit `_generated` files** — find the generator or the user-owned counterpart.
 2. **Frontend SDK is the source of truth** — all API calls go through `sdk/api/`. Never call services directly from UI components.
 3. **Backend-first for new endpoints** — add route in handlers_register.go, then usecase, then repository, then gateway proxy.
-4. **Test mocks must stay in sync** — when adding repository interface methods, update `evaluation_test.go` mock.
-5. **Use `engram` for persistent memory** — save decisions, patterns, and gotchas after every session.
+4. **Use `engram` for persistent memory** — save decisions, patterns, and gotchas after every session.

@@ -16,10 +16,10 @@ func TestExtendedClaims_Serialize(t *testing.T) {
 
 	claims := ExtendedClaims{
 		UserID:        userID,
-		Role:          "admin_destino",
-		DestinationID: &destID,
+		Role:          "admin_organization",
+		OrganizationID: &destID,
 		Permissions: PermissionClaims{
-			AccessScope:             "destination",
+			AccessScope:             "organization",
 			CanWriteValues:          true,
 			CanManageUsers:          true,
 			CanApproveGoodPractices: false,
@@ -52,25 +52,25 @@ func TestExtendedClaims_Serialize(t *testing.T) {
 	if parsed.UserID != userID {
 		t.Errorf("UserID: got %q, want %q", parsed.UserID, userID)
 	}
-	if parsed.Role != "admin_destino" {
-		t.Errorf("Role: got %q, want 'admin_destino'", parsed.Role)
+	if parsed.Role != "admin_organization" {
+		t.Errorf("Role: got %q, want 'admin_organization'", parsed.Role)
 	}
-	if parsed.DestinationID == nil {
-		t.Fatal("DestinationID is nil")
+	if parsed.OrganizationID == nil {
+		t.Fatal("OrganizationID is nil")
 	}
-	if *parsed.DestinationID != destID {
-		t.Errorf("DestinationID: got %q, want %q", *parsed.DestinationID, destID)
+	if *parsed.OrganizationID != destID {
+		t.Errorf("OrganizationID: got %q, want %q", *parsed.OrganizationID, destID)
 	}
-	if parsed.Permissions.AccessScope != "destination" {
-		t.Errorf("Permissions.AccessScope: got %q, want 'destination'", parsed.Permissions.AccessScope)
+	if parsed.Permissions.AccessScope != "organization" {
+		t.Errorf("Permissions.AccessScope: got %q, want 'organization'", parsed.Permissions.AccessScope)
 	}
 	if !parsed.Permissions.CanWriteValues {
 		t.Error("Permissions.CanWriteValues should be true")
 	}
 }
 
-func TestExtendedClaims_NilDestinationID(t *testing.T) {
-	// RED: Verify claims work without DestinationID (admin user)
+func TestExtendedClaims_NilOrganizationID(t *testing.T) {
+	// RED: Verify claims work without OrganizationID (admin user)
 	claims := ExtendedClaims{
 		UserID: uuid.New().String(),
 		Role:   "admin",
@@ -99,8 +99,8 @@ func TestExtendedClaims_NilDestinationID(t *testing.T) {
 	if parsed.Role != "admin" {
 		t.Errorf("Role: got %q, want 'admin'", parsed.Role)
 	}
-	if parsed.DestinationID != nil {
-		t.Error("expected DestinationID to be nil for admin user")
+	if parsed.OrganizationID != nil {
+		t.Error("expected OrganizationID to be nil for admin user")
 	}
 }
 

@@ -6,18 +6,13 @@
 
 ```
 app/
-├── (dti)/              ← Authenticated DTI pages (DtiShell layout)
-│   ├── evaluaciones/
-│   ├── acciones/
-│   ├── plan-transformacion/
-│   ├── resultados/
-│   ├── informes/
-│   ├── configuracion/  ← Moved from (admin)
-│   └── perfil/         ← Moved from (admin)
-├── (admin)/            ← DEPRECATED — migrating to (dti)
+├── (admin)/            ← Authenticated pages (AppShell layout)
+│   ├── dashboard/
+│   ├── configuracion/
+│   └── perfil/
 ├── (public)/           ← No auth required
 │   ├── login/
-│   └── buenas-practicas/
+│   └── home/
 └── api/                ← BFF proxy routes
     ├── [...path]/       ← Generic proxy to api-gateway
     ├── auth/
@@ -30,14 +25,13 @@ app/
 
 ## Layouts
 
-### DtiLayout (`app/(dti)/layout.tsx`)
-- Wraps all DTI pages with `DtiShell`
-- Includes `DestinoProvider` for destination context
+### AdminLayout (`app/(admin)/layout.tsx`)
+- Wraps all admin pages with `AppShell`
 - Includes `Toaster` for notifications
-- RoleGuard with DTI roles
+- RoleGuard for admin roles
 
 ### RootLayout (`app/layout.tsx`)
-- Global CSS imports (`globals_generated.css`, `globals_dti.css`, `leaflet.css`)
+- Global CSS imports (`globals_generated.css`, `globals.css`)
 - `AuthProvider` wrapper
 - No UI — just providers
 
@@ -70,7 +64,7 @@ Forwards any path to the api-gateway:
 - Use for interactive UI
 
 ### Route Groups
-- Grouped by parentheses: `(dti)`, `(public)`, etc.
+- Grouped by parentheses: `(admin)`, `(public)`, etc.
 - Each group can have its own `layout.tsx`
 - URL path does NOT include the group name
 
@@ -89,27 +83,14 @@ export default async function Page({ params }: { params: Promise<{ id: string }>
 Use Next.js `Link` component:
 ```tsx
 import Link from 'next/link';
-<Link href="/evaluaciones">Evaluaciones</Link>
+<Link href="/dashboard">Dashboard</Link>
 ```
 
 For programmatic navigation:
 ```tsx
 import { useRouter } from 'next/navigation';
 const router = useRouter();
-router.push('/evaluaciones');
-```
-
-## Data Fetching
-
-### Server-side (in pages)
-```tsx
-const data = await fetch('/api/evaluations/destinations');
-```
-
-### Client-side (in components)
-```tsx
-import useSWR from 'swr';
-const { data } = useSWR('destinations', () => getDestinations());
+router.push('/dashboard');
 ```
 
 ## Rules

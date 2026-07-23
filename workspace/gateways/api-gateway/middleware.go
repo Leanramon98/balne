@@ -9,11 +9,6 @@ import (
 	"github.com/labstack/echo/v4"
 )
 
-type Claims struct {
-	UserID string   `json:"user_id"`
-	Roles  []string `json:"roles"`
-	jwt.RegisteredClaims
-}
 
 // NeutralClaims holds the tenant-aware identity claims from a neutral JWT.
 // Fields match the users-service NeutralClaims definition; UUIDs are stored
@@ -27,13 +22,6 @@ type NeutralClaims struct {
 	jwt.RegisteredClaims
 }
 
-// LoginClaims combines neutral and legacy DTI claims in a single struct.
-// Dual-mode JWTs carry both sets; the middleware extracts what is present.
-type LoginClaims struct {
-	NeutralClaims
-	UserID string   `json:"user_id"`
-	Roles  []string `json:"roles"`
-}
 
 var publicPaths = []string{
 	"/api/evaluations/health",
@@ -71,10 +59,8 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusUnauthorized, "invalid authorization format")
 		}
 
-		// Parse JWT with LoginClaims — supports neutral, legacy, and dual-mode JWTs.
-		// The NeutralClaims embedded struct handles sub_id/sid/org_id/mem_id/dep_mode;
-		// the outer struct handles legacy user_id/roles. Extra fields are ignored.
-		claims := &LoginClaims{}
+		// Parse JWT with NeutralClaims
+		claims := &NeutralClaims{}
 		token, err := jwt.ParseWithClaims(tokenString, claims, func(t *jwt.Token) (interface{}, error) {
 			return secret, nil
 		})
@@ -82,43 +68,23 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 			return echo.NewHTTPError(http.StatusUnauthorized, "invalid or expired token")
 		}
 
-		hasNeutral := claims.SubjectID != ""
-		hasLegacy := claims.UserID != ""
-
-		if !hasNeutral && !hasLegacy {
+		if claims.SubjectID == "" {
 			return echo.NewHTTPError(http.StatusUnauthorized, "token missing required claims")
 		}
 
-		// Forward neutral claims (neutral-only and dual-mode JWTs)
-		if hasNeutral {
-			c.Set("sub_id", claims.SubjectID)
-			c.Set("sid", claims.SessionID)
-			c.Set("org_id", claims.OrganizationID)
-			c.Set("mem_id", claims.MembershipID)
-			c.Set("dep_mode", claims.DeploymentMode)
+		// Forward neutral claims
+		c.Set("sub_id", claims.SubjectID)
+		c.Set("sid", claims.SessionID)
+		c.Set("org_id", claims.OrganizationID)
+		c.Set("mem_id", claims.MembershipID)
+		c.Set("dep_mode", claims.DeploymentMode)
 
-			c.Request().Header.Set("X-Organization-ID", claims.OrganizationID)
-			c.Request().Header.Set("X-Membership-ID", claims.MembershipID)
-			c.Request().Header.Set("X-Deployment-Mode", claims.DeploymentMode)
+		c.Request().Header.Set("X-Organization-ID", claims.OrganizationID)
+		c.Request().Header.Set("X-Membership-ID", claims.MembershipID)
+		c.Request().Header.Set("X-Deployment-Mode", claims.DeploymentMode)
 
-			// Neutral-only JWTs use sub_id as the authenticated user
-			if !hasLegacy {
-				c.Set("user_id", claims.SubjectID)
-				c.Request().Header.Set("X-Authenticated-User", claims.SubjectID)
-			}
-		}
-
-		// Forward legacy DTI claims (legacy-only and dual-mode JWTs)
-		if hasLegacy {
-			c.Set("user_id", claims.UserID)
-			c.Set("roles", claims.Roles)
-			c.Request().Header.Set("X-Authenticated-User", claims.UserID)
-			c.Request().Header.Set("X-Authenticated-Roles", strings.Join(claims.Roles, ","))
-
-			if !hasNeutral {
-				c.Set("sub_id", claims.UserID)
-			}
-		}
+		c.Set("user_id", claims.SubjectID)
+		c.Request().Header.Set("X-Authenticated-User", claims.SubjectID)
 
 		// RBAC check
 		// TODO: lookup route from c.Path() and validate roles

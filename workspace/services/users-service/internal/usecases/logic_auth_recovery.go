@@ -97,7 +97,7 @@ func (l *Logic) ForgotPassword(ctx context.Context, email string) error {
 				"Este enlace expira en 1 hora.\n\n" +
 				"Si no solicitaste este cambio, ignora este mensaje."
 		}
-		if err := l.emailSvc.SendEmail(email, "Restablecer tu contraseña - Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI", body); err != nil {
+		if err := l.emailSvc.SendEmail(email, "Restablecer tu contraseña - My Application", body); err != nil {
 			log.Printf("ForgotPassword: failed to send email to %s: %v", email, err)
 			// Non-fatal — token was saved, user can retry
 		}
@@ -276,7 +276,7 @@ func (l *Logic) RestorePasswordForUser(ctx context.Context, id string) error {
 				"Nueva contraseña: " + rawPassword + "\n\n" +
 				"Te recomendamos cambiar tu contraseña después de iniciar sesión."
 		}
-		if err := l.emailSvc.SendEmail(user.Email, "Tu contraseña ha sido restablecida - Plataforma de Autodiagnóstico DTI - Red Iberoamericana DTI", body); err != nil {
+		if err := l.emailSvc.SendEmail(user.Email, "Tu contraseña ha sido restablecida - My Application", body); err != nil {
 			log.Printf("RestorePasswordForUser: failed to send email to %s: %v", user.Email, err)
 		}
 	}

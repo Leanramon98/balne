@@ -126,7 +126,7 @@ func WithFrontendURL(url string) LogicOption {
 }
 
 // WithLogoURL sets the absolute URL for the logo in email templates.
-// Falls back to frontendURL + "/dti-logo.webp" when not set.
+// Falls back to frontendURL + "/logo.webp" when not set.
 func WithLogoURL(url string) LogicOption {
 	return func(l *Logic) {
 		l.logoURL = url
@@ -143,12 +143,12 @@ func NewLogic(opts ...LogicOption) *Logic {
 }
 
 // getLogoURL returns the logo URL for email templates.
-// Uses the explicitly configured logo URL if set, otherwise uses the production DTI logo.
+// Uses the explicitly configured logo URL if set.
 func (l *Logic) getLogoURL() string {
 	if l.logoURL != "" {
 		return l.logoURL
 	}
-	return "https://evaluacionesdti.rediberoamericanadti.org/dti-logo.webp"
+	return "https://example.com/logo.webp"
 }
 
 // Ensure Logic satisfies the driving port at compile time.

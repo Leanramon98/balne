@@ -1,5 +1,4 @@
 import './globals_generated.css';
-import './globals_dti.css';
 import 'leaflet/dist/leaflet.css';
 import { AuthProvider } from '@/sdk/auth/AuthContext';
 import { getLocale } from 'next-intl/server';
@@ -9,10 +8,10 @@ import type { ReactNode } from 'react';
 export const metadata: Metadata = {
   icons: {
     icon: [
-      { url: '/dti-favicon.png?v=5', type: 'image/png' },
+      { url: '/favicon.png?v=5', type: 'image/png' },
     ],
-    shortcut: '/dti-favicon.png?v=5',
-    apple: '/dti-favicon.png?v=5',
+    shortcut: '/favicon.png?v=5',
+    apple: '/apple-icon.png',
   },
 };
 
@@ -21,8 +20,13 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
 
   return (
     <html lang={locale}>
+      <head>
+        <title>Project Template</title>
+      </head>
       <body>
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+        </AuthProvider>
       </body>
     </html>
   );

@@ -233,7 +233,7 @@ func NewUserRepo(db *DB) *UserRepo {
 // Ensure UserRepo satisfies the driven port at compile time.
 var _ portout.UserRepository = (*UserRepo)(nil)
 
-// scanUser scans a row into a domain.User, handling nullable DestinationID.
+// scanUser scans a row into a domain.User, handling nullable OrganizationID.
 func scanUser(scanner interface {
 	Scan(dest ...interface{}) error
 }) (*domain.User, error) {
@@ -265,7 +265,7 @@ func scanUser(scanner interface {
 		if err != nil {
 			return nil, err
 		}
-		u.DestinationID = &uid
+		u.OrganizationID = &uid
 	}
 	if createdAt.Valid {
 		u.CreatedAt = createdAt.Time
@@ -278,7 +278,7 @@ func scanUser(scanner interface {
 
 func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, email, passwordhash, fullname, phone, roleid, destinationid, isactive, firstlogin, createdat, updatedat
+		SELECT id, email, passwordhash, fullname, phone, roleid, organizationid, isactive, firstlogin, createdat, updatedat
 		FROM "user"
 		WHERE email = $1
 	`, email)
@@ -287,7 +287,7 @@ func (r *UserRepo) FindByEmail(ctx context.Context, email string) (*domain.User,
 
 func (r *UserRepo) FindByID(ctx context.Context, id string) (*domain.User, error) {
 	row := r.db.QueryRowContext(ctx, `
-		SELECT id, email, passwordhash, fullname, phone, roleid, destinationid, isactive, firstlogin, createdat, updatedat
+		SELECT id, email, passwordhash, fullname, phone, roleid, organizationid, isactive, firstlogin, createdat, updatedat
 		FROM "user"
 		WHERE id = $1
 	`, id)
@@ -296,7 +296,7 @@ func (r *UserRepo) FindByID(ctx context.Context, id string) (*domain.User, error
 
 func (r *UserRepo) FindAll(ctx context.Context) ([]*domain.User, error) {
 	rows, err := r.db.QueryContext(ctx, `
-		SELECT id, email, passwordhash, fullname, phone, roleid, destinationid, isactive, firstlogin, createdat, updatedat
+		SELECT id, email, passwordhash, fullname, phone, roleid, organizationid, isactive, firstlogin, createdat, updatedat
 		FROM "user"
 		ORDER BY createdat DESC
 	`)
@@ -319,10 +319,10 @@ func (r *UserRepo) FindAll(ctx context.Context) ([]*domain.User, error) {
 func (r *UserRepo) Save(ctx context.Context, entity *domain.User) error {
 	log.Printf("[UserRepo.Save] db=%p entity.ID=%s email=%s roleID=%s", r.db, entity.ID, entity.Email, entity.RoleID)
 	_, err := r.db.ExecContext(ctx, `
-		INSERT INTO "user" (id, email, passwordhash, fullname, phone, roleid, destinationid, isactive, firstlogin, createdat, updatedat)
+		INSERT INTO "user" (id, email, passwordhash, fullname, phone, roleid, organizationid, isactive, firstlogin, createdat, updatedat)
 		VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11)
 	`, entity.ID, entity.Email, entity.PasswordHash, entity.FullName, entity.Phone,
-		entity.RoleID, entity.DestinationID, entity.IsActive, entity.FirstLogin, entity.CreatedAt, entity.UpdatedAt)
+		entity.RoleID, entity.OrganizationID, entity.IsActive, entity.FirstLogin, entity.CreatedAt, entity.UpdatedAt)
 	if err != nil {
 		log.Printf("[UserRepo.Save] INSERT ERROR: %v", err)
 	} else {
@@ -338,19 +338,19 @@ func (r *UserRepo) Update(ctx context.Context, entity *domain.User) error {
 		_, err := r.db.ExecContext(ctx, `
 			UPDATE "user"
 			SET email = $1, fullname = $2, phone = $3, roleid = $4,
-			    destinationid = $5, isactive = $6, firstlogin = $7, updatedat = $8
+			    organizationid = $5, isactive = $6, firstlogin = $7, updatedat = $8
 			WHERE id = $9
 		`, entity.Email, entity.FullName, entity.Phone, entity.RoleID,
-			entity.DestinationID, entity.IsActive, entity.FirstLogin, entity.UpdatedAt, entity.ID)
+			entity.OrganizationID, entity.IsActive, entity.FirstLogin, entity.UpdatedAt, entity.ID)
 		return err
 	}
 	_, err := r.db.ExecContext(ctx, `
 		UPDATE "user"
 		SET email = $1, passwordhash = $2, fullname = $3, phone = $4, roleid = $5,
-		    destinationid = $6, isactive = $7, firstlogin = $8, updatedat = $9
+		    organizationid = $6, isactive = $7, firstlogin = $8, updatedat = $9
 		WHERE id = $10
 	`, entity.Email, entity.PasswordHash, entity.FullName, entity.Phone, entity.RoleID,
-		entity.DestinationID, entity.IsActive, entity.FirstLogin, entity.UpdatedAt, entity.ID)
+		entity.OrganizationID, entity.IsActive, entity.FirstLogin, entity.UpdatedAt, entity.ID)
 	return err
 }
 

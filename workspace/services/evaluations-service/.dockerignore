@@ -1,5 +1,0 @@
-*.md
-.git/
-vendor/
-node_modules/
-*_test.go

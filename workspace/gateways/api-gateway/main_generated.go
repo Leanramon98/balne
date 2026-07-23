@@ -55,87 +55,46 @@ func main() {
 
 	e.GET("/api/users/audit-logs", proxyHandler("users-service", 8081, "/api/users", "/api"), AuthMiddleware)
 
-	// NOTE: /api/evaluations/health is registered in routes_evaluations.go (public, no auth)
-
-	e.GET("/api/evaluations/admin/subnational-levels", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/subnational-levels", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/subnational-levels/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/subnational-levels/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/subnational-levels/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/typologies", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/typologies", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/typologies/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/typologies/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/typologies/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/population-ranges", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/population-ranges", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/population-ranges/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/population-ranges/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/population-ranges/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/regions", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/regions", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/regions/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/regions/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/regions/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/member-types", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/member-types", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/member-types/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/member-types/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/member-types/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/responsible-areas", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/responsible-areas", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/responsible-areas/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/responsible-areas/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/responsible-areas/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/axes", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.POST("/api/evaluations/admin/axes", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/admin/axes/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.PUT("/api/evaluations/admin/axes/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.DELETE("/api/evaluations/admin/axes/:id", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/scopes", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/requirements", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
-
-	e.GET("/api/evaluations/indicators", proxyHandler("evaluations-service", 8082, "/api/evaluations", "/api"), AuthMiddleware)
 
 
-	// User-owned custom handler routes (evaluations domain)
-	RegisterEvaluationRoutes(e)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 	// User-owned custom handler routes (users auth domain)
 	RegisterUserRoutes(e)
