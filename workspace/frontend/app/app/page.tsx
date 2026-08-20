@@ -66,7 +66,7 @@ export default function DashboardPage() {
               Bienvenido al panel de administración de tu plataforma base. Desde acá podés gestionar accesos y roles del sistema.
             </p>
           </div>
-          <Link href="/perfil" passHref>
+          <Link href="/app/perfil" passHref>
             <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-md border-none transition-all duration-200 hover:translate-y-[-2px]">
               Ver mi perfil
               <ArrowUpRight className="ml-2 h-4 w-4" />
@@ -136,19 +136,19 @@ export default function DashboardPage() {
           <CardDescription>Atajos a las vistas principales</CardDescription>
         </CardHeader>
         <CardContent className="grid gap-4 sm:grid-cols-3">
-          <Link href="/user" passHref className="w-full">
+          <Link href="/app/user" passHref className="w-full">
             <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-blue-50 hover:text-blue-700 transition-colors">
               <Users className="h-5 w-5 text-blue-500" />
               Administrar Usuarios
             </Button>
           </Link>
-          <Link href="/role" passHref className="w-full">
+          <Link href="/app/role" passHref className="w-full">
             <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
               <Shield className="h-5 w-5 text-indigo-500" />
               Ver Roles y Permisos
             </Button>
           </Link>
-          <Link href="/perfil" passHref className="w-full">
+          <Link href="/app/perfil" passHref className="w-full">
             <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-slate-50 transition-colors">
               <User className="h-5 w-5 text-slate-500" />
               Configurar mi Perfil

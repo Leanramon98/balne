@@ -3,21 +3,21 @@
 import { ReactNode } from 'react';
 import { moduleRegistry } from '@/sdk/platform';
 
-// Register role module contributions on import
+// Register user module contributions on import
 moduleRegistry.register({
-  moduleId: 'role',
+  moduleId: 'user',
   navItems: [
     {
-      id: 'admin-roles',
-      label: 'Roles',
-      href: '/role',
+      id: 'admin-users',
+      label: 'Usuarios',
+      href: '/app/user',
       icon: 'users',
       section: 'Administración',
-      order: 2,
+      order: 1,
     },
   ],
 });
 
-export default function RoleLayout({ children }: { children: ReactNode }) {
+export default function UserLayout({ children }: { children: ReactNode }) {
   return <>{children}</>;
 }

@@ -10,7 +10,7 @@ moduleRegistry.register({
     {
       id: 'reference-notes',
       label: 'Notes',
-      href: '/reference',
+      href: '/app/reference',
       icon: 'fileText',
       section: 'Modules',
       order: 1,

@@ -10,7 +10,7 @@ moduleRegistry.register({
     {
       id: 'admin-auditlog',
       label: 'Auditoría',
-      href: '/auditlog',
+      href: '/app/auditlog',
       icon: 'clipboard',
       section: 'Administración',
       order: 3,

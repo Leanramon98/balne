@@ -66,7 +66,7 @@ interface NavItemProps {
 
 function NavItem({ href, icon: Icon, label, disabled, title, onClick }: NavItemProps) {
   const pathname = usePathname();
-  const isActive = !disabled && (href === '/' ? pathname === '/' : pathname?.startsWith(href));
+  const isActive = !disabled && (href === '/app' ? pathname === '/app' : pathname?.startsWith(href));
 
   const className = cn(
     'flex items-center gap-3 rounded-lg px-3 py-2 text-sm font-medium transition-colors',
@@ -159,7 +159,7 @@ export function NeutralShell({ children }: { children: ReactNode }) {
         {/* Header row: brand + close button */}
         <div className="h-16 flex items-center justify-between border-b border-border px-4">
           <Link
-            href="/"
+            href="/app"
             onClick={closeSidebar}
             className="flex items-center gap-2 font-semibold text-lg text-foreground"
           >
@@ -241,7 +241,7 @@ export function NeutralShell({ children }: { children: ReactNode }) {
                 <DropdownMenuLabel>Mi Cuenta</DropdownMenuLabel>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem asChild>
-                  <Link href="/perfil" className="flex items-center gap-2 cursor-pointer w-full">
+                  <Link href="/app/perfil" className="flex items-center gap-2 cursor-pointer w-full">
                     <User className="h-4 w-4" />
                     <span>Mi Perfil</span>
                   </Link>

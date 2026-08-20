@@ -29,8 +29,15 @@ export function middleware(request: NextRequestType) {
   const rawLocale = request.cookies.get(cookieName)?.value;
   const locale = rawLocale && (locales as readonly string[]).includes(rawLocale) ? rawLocale : defaultLocale;
 
+  // Marketing and future venue slugs are public. Only the application area
+  // requires a session; auth and API allowlists keep their existing behavior.
+  const requiresAuth =
+    pathname === '/app' ||
+    pathname.startsWith('/app/') ||
+    AUTH_ONLY_ROUTES.some(route => pathname.startsWith(route));
+
   // Allow public routes (no token required)
-  if (PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
+  if (pathname === '/' || PUBLIC_ROUTES.some(route => pathname.startsWith(route))) {
     const response = NextResponse.next();
     response.headers.set('x-next-intl-locale', locale);
     return response;
@@ -41,6 +48,12 @@ export function middleware(request: NextRequestType) {
     pathname.startsWith('/_next') ||
     pathname.startsWith('/favicon.ico')
   ) {
+    const response = NextResponse.next();
+    response.headers.set('x-next-intl-locale', locale);
+    return response;
+  }
+
+  if (!requiresAuth) {
     const response = NextResponse.next();
     response.headers.set('x-next-intl-locale', locale);
     return response;

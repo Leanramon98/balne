@@ -50,7 +50,7 @@ export function UserProfilePill({ name, role }: UserProfilePillProps) {
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end" className="w-56 p-2">
         <DropdownMenuItem asChild className="cursor-pointer px-3 py-2.5">
-          <Link href="/perfil">
+          <Link href="/app/perfil">
             <User className="mr-3 h-4 w-4 text-primary" />
             <span className="text-primary">{t('perfil')}</span>
           </Link>

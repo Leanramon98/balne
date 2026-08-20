@@ -73,7 +73,7 @@ export default function LoginPage() {
       if (result.firstLogin) {
         router.push('/cambiar-contrasena');
       } else {
-        router.push('/');
+        router.push('/app');
       }
     } catch {
       setError(t('page.login.invalid-credentials'));
