@@ -21,8 +21,28 @@ import {
 } from 'lucide-react';
 
 export const metadata: Metadata = {
-  title: 'El plano de tu balneario, vivo y en el bolsillo',
-  description: 'Balne reúne reservas, cobros y control de acceso para balnearios de la Costa Atlántica.',
+	title: 'El plano de tu balneario, vivo y en el bolsillo',
+	description: 'Balne reúne reservas, cobros y control de acceso para balnearios de la Costa Atlántica.',
+	openGraph: {
+		url: '/',
+		images: [
+			{
+				url: '/opengraph-image.png',
+				width: 1200,
+				height: 630,
+				alt: 'Logo de Balne, sistema de gestión para balnearios de la Costa Atlántica',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		images: [
+			{
+				url: '/opengraph-image.png',
+				alt: 'Logo de Balne, sistema de gestión para balnearios de la Costa Atlántica',
+			},
+		],
+	},
 };
 
 const features = [

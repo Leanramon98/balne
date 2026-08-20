@@ -21,20 +21,42 @@ const workSans = Work_Sans({
 });
 
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.balne.com.ar'),
-  title: {
+	metadataBase: new URL('https://balne.com.ar'),
+	title: {
     default: 'Balne | El plano de tu balneario, vivo y en el bolsillo',
     template: '%s | Balne',
   },
-  description: 'Sistema de gestión para balnearios de la Costa Atlántica: reservas, cobros y control de acceso en un solo lugar.',
-  openGraph: {
+	description: 'Sistema de gestión para balnearios de la Costa Atlántica: reservas, cobros y control de acceso en un solo lugar.',
+	alternates: {
+		canonical: '/',
+	},
+	openGraph: {
     title: 'Balne | El plano de tu balneario, vivo y en el bolsillo',
     description: 'Reservas, cobros y control de acceso en un solo lugar.',
     url: '/',
     siteName: 'Balne',
-    locale: 'es_AR',
-    type: 'website',
-  },
+		locale: 'es_AR',
+		type: 'website',
+		images: [
+			{
+				url: '/opengraph-image.png',
+				width: 1200,
+				height: 630,
+				alt: 'Logo de Balne, sistema de gestión para balnearios de la Costa Atlántica',
+			},
+		],
+	},
+	twitter: {
+		card: 'summary_large_image',
+		title: 'Balne | El plano de tu balneario, vivo y en el bolsillo',
+		description: 'Reservas, cobros y control de acceso en un solo lugar.',
+		images: [
+			{
+				url: '/opengraph-image.png',
+				alt: 'Logo de Balne, sistema de gestión para balnearios de la Costa Atlántica',
+			},
+		],
+	},
   icons: {
     icon: [
       { url: '/favicon.png?v=5', type: 'image/png' },
