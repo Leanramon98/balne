@@ -1,6 +1,7 @@
 import './globals_generated.css';
 import './globals.css';
 import 'leaflet/dist/leaflet.css';
+import Script from 'next/script';
 import { getLocale } from 'next-intl/server';
 import { Shrikhand, Work_Sans } from 'next/font/google';
 import type { Metadata } from 'next';
@@ -72,6 +73,18 @@ export default async function RootLayout({ children }: { children: ReactNode }) 
   return (
     <html lang={locale} className={`${shrikhand.variable} ${workSans.variable}`}>
       <body>{children}</body>
+      <Script
+        src="https://www.googletagmanager.com/gtag/js?id=G-YRGS4Z7W58"
+        strategy="afterInteractive"
+      />
+      <Script id="ga-init" strategy="afterInteractive">
+        {`
+          window.dataLayer = window.dataLayer || [];
+          function gtag(){dataLayer.push(arguments);}
+          gtag('js', new Date());
+          gtag('config', 'G-YRGS4Z7W58');
+        `}
+      </Script>
     </html>
   );
 }
