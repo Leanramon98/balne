@@ -21,6 +21,10 @@ import {
   X,
   Loader2,
   LogOut,
+  CalendarDays,
+  Edit3,
+  Layers,
+  SquarePen,
   type LucideIcon,
 } from 'lucide-react';
 import { ScrollArea } from '@/components/ui/scroll-area';
@@ -48,6 +52,10 @@ const iconMap: Record<string, LucideIcon> = {
   helpCircle: HelpCircle,
   user: User,
   users: Users,
+  calendar: CalendarDays,
+  edit: Edit3,
+  layers: Layers,
+  squarePen: SquarePen,
 };
 
 function resolveIcon(iconName?: string): LucideIcon | null {
@@ -164,9 +172,9 @@ export function NeutralShell({ children }: { children: ReactNode }) {
             className="flex items-center gap-2 font-semibold text-lg text-foreground"
           >
             <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary text-primary-foreground text-sm font-bold">
-              P
+              B
             </div>
-            <span>Platform</span>
+            <span>Balne</span>
           </Link>
           <button
             type="button"
@@ -222,12 +230,17 @@ export function NeutralShell({ children }: { children: ReactNode }) {
 
             {session?.organization_id && (
               <span className="text-xs text-muted-foreground hidden sm:inline">
-                Org: {session.organization_id.slice(0, 8)}...
+                {session.is_local_demo ? 'Balneario de muestra' : `Org: ${session.organization_id.slice(0, 8)}...`}
               </span>
             )}
           </div>
 
           <div className="flex items-center gap-3 shrink-0">
+            {session?.is_local_demo && (
+              <span className="rounded-full border border-amber-300 bg-amber-50 px-2.5 py-1 text-xs font-semibold text-amber-800">
+                Sesión local demo
+              </span>
+            )}
             <DropdownMenu>
               <DropdownMenuTrigger className="focus:outline-none">
                 <div className="flex items-center gap-2 text-sm text-muted-foreground hover:text-foreground cursor-pointer transition-colors p-1.5 rounded-lg hover:bg-muted/50">

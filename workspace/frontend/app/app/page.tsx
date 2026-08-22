@@ -1,161 +1,105 @@
-'use client';
+import { localDemoBalneario } from '@/demo/balne-fixture';
+import { Badge } from '@/components/ui/badge';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { MapPin, Users, Umbrella, Waves } from 'lucide-react';
 
-import React from 'react';
-import useSWR from 'swr';
-import Link from 'next/link';
-import { useAuth } from '@/sdk/auth/AuthContext';
-import { useAuthHeaders } from '@/sdk/hooks/useAuthHeaders';
-import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/ui/card';
-import { Button } from '@/components/ui/button';
-import {
-  Users,
-  Shield,
-  Activity,
-  User,
-  ArrowUpRight,
-  TrendingUp,
-  LayoutDashboard,
-  Clock,
-} from 'lucide-react';
+const statusLabels = {
+  available: 'Disponible',
+  occupied: 'Ocupada',
+  held: 'En espera',
+};
 
-export default function DashboardPage() {
-  const { user } = useAuth();
-  const getAuthHeaders = useAuthHeaders();
+const statusClasses = {
+  available: 'bg-emerald-100 text-emerald-800 border-emerald-200',
+  occupied: 'bg-sky-100 text-sky-800 border-sky-200',
+  held: 'bg-amber-100 text-amber-800 border-amber-200',
+};
 
-  // Fetch users count dynamically
-  const { data: users } = useSWR('dashboard-users', () => {
-    const headers = getAuthHeaders();
-    return fetch('/api/users/users', { headers })
-      .then((r) => r.json())
-      .then((d) => {
-        const list = d?.Items || d?.items || d;
-        return Array.isArray(list) ? list : [];
-      })
-      .catch(() => []);
-  });
+const currency = new Intl.NumberFormat('es-AR', {
+  style: 'currency',
+  currency: localDemoBalneario.currency,
+  maximumFractionDigits: 0,
+});
 
-  // Fetch roles count dynamically
-  const { data: roles } = useSWR('dashboard-roles', () => {
-    const headers = getAuthHeaders();
-    return fetch('/api/users/roles', { headers })
-      .then((r) => r.json())
-      .then((d) => {
-        const list = d?.Items || d?.items || d;
-        return Array.isArray(list) ? list : [];
-      })
-      .catch(() => []);
-  });
-
-  const activeUsersCount = users ? users.filter((u: any) => u.is_active || u.IsActive || u.isActive).length : 0;
-  const totalUsersCount = users ? users.length : 0;
-  const rolesCount = roles ? roles.length : 0;
-
-  const userName = user?.name || user?.email || 'Admin';
+export default function OperationsOverviewPage() {
+  const units = localDemoBalneario.units;
+  const availableCount = units.filter((unit) => unit.status === 'available').length;
+  const occupiedCount = units.filter((unit) => unit.status === 'occupied').length;
+  const heldCount = units.filter((unit) => unit.status === 'held').length;
 
   return (
-    <div className="space-y-8 p-6 max-w-7xl mx-auto animate-content-enter">
-      {/* Welcome Hero Banner */}
-      <div className="relative overflow-hidden rounded-2xl bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 p-8 text-white shadow-lg">
-        <div className="absolute top-0 right-0 -mr-20 -mt-20 w-80 h-80 rounded-full bg-white/10 blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 -ml-20 -mb-20 w-60 h-60 rounded-full bg-indigo-500/20 blur-2xl pointer-events-none" />
-        
-        <div className="relative z-10 flex flex-col md:flex-row justify-between items-start md:items-center gap-4">
+    <div className="mx-auto max-w-7xl space-y-6 p-4 sm:p-6">
+      <section className="overflow-hidden rounded-2xl bg-[#063b4c] px-6 py-7 text-white shadow-sm sm:px-8">
+        <p className="text-xs font-bold tracking-[0.18em] text-cyan-200">OPERACIÓN CENTRAL</p>
+        <div className="mt-3 flex flex-col justify-between gap-5 md:flex-row md:items-end">
           <div>
-            <h1 className="text-3xl font-extrabold tracking-tight">¡Hola de nuevo, {userName}!</h1>
-            <p className="mt-2 text-indigo-100 max-w-xl">
-              Bienvenido al panel de administración de tu plataforma base. Desde acá podés gestionar accesos y roles del sistema.
-            </p>
+            <h1 className="text-3xl font-semibold tracking-tight">{localDemoBalneario.name}</h1>
+            <p className="mt-2 flex items-center gap-2 text-sm text-cyan-50"><MapPin className="h-4 w-4" />{localDemoBalneario.location}</p>
           </div>
-          <Link href="/app/perfil" passHref>
-            <Button className="bg-white text-indigo-700 hover:bg-indigo-50 font-semibold shadow-md border-none transition-all duration-200 hover:translate-y-[-2px]">
-              Ver mi perfil
-              <ArrowUpRight className="ml-2 h-4 w-4" />
-            </Button>
-          </Link>
+          <p className="rounded-full bg-white/15 px-3 py-1.5 text-sm font-medium">{localDemoBalneario.dateLabel}</p>
         </div>
+      </section>
+
+      <div className="rounded-xl border border-amber-300 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+        <strong>DEMO LOCAL.</strong> Disponibilidad, unidades y tarifas de muestra. Esta vista no guarda reservas, cobros ni accesos.
       </div>
 
-      {/* KPI Cards */}
-      <div className="grid gap-6 md:grid-cols-3">
-        <Card className="shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-              Usuarios Activos
-            </CardTitle>
-            <div className="rounded-full bg-blue-50 p-2.5 text-blue-600">
-              <Users className="h-5 w-5" />
-            </div>
+      <section className="grid gap-4 sm:grid-cols-3">
+        <Metric label="Disponibles" value={availableCount} detail={`de ${units.length} unidades`} tone="text-emerald-700" icon={<Umbrella className="h-5 w-5" />} />
+        <Metric label="Ocupadas" value={occupiedCount} detail="en uso ahora" tone="text-sky-700" icon={<Users className="h-5 w-5" />} />
+        <Metric label="En espera" value={heldCount} detail="para confirmar" tone="text-amber-700" icon={<Waves className="h-5 w-5" />} />
+      </section>
+
+      <section className="grid gap-6 lg:grid-cols-[1.6fr_0.9fr]">
+        <Card>
+          <CardHeader>
+            <CardTitle>Disponibilidad actual</CardTitle>
+            <CardDescription>Estado operativo por unidad del balneario de muestra.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{activeUsersCount}</div>
-            <p className="mt-1 text-xs text-slate-500">
-              De un total de {totalUsersCount} registrados
-            </p>
+          <CardContent className="space-y-2">
+            {units.map((unit) => (
+              <div key={unit.id} className="flex flex-wrap items-center justify-between gap-3 rounded-xl border border-slate-200 p-3">
+                <div>
+                  <p className="font-semibold text-slate-900">{unit.label}</p>
+                  <p className="text-sm text-slate-500">{unit.sector} · {unit.capacity} personas</p>
+                </div>
+                <Badge variant="outline" className={statusClasses[unit.status]}>{statusLabels[unit.status]}</Badge>
+              </div>
+            ))}
           </CardContent>
         </Card>
 
-        <Card className="shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-              Roles en Sistema
-            </CardTitle>
-            <div className="rounded-full bg-indigo-50 p-2.5 text-indigo-600">
-              <Shield className="h-5 w-5" />
-            </div>
+        <Card>
+          <CardHeader>
+            <CardTitle>Tarifas de muestra</CardTitle>
+            <CardDescription>Valores diarios orientativos para el próximo flujo de venta.</CardDescription>
           </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-slate-900">{rolesCount}</div>
-            <p className="mt-1 text-xs text-slate-500">
-              Perfiles de acceso configurados
-            </p>
+          <CardContent className="space-y-4">
+            {localDemoBalneario.tariffs.map((tariff) => (
+              <div key={tariff.name} className="rounded-xl bg-slate-50 p-4">
+                <p className="font-semibold text-slate-900">{tariff.name}</p>
+                <p className="mt-1 text-2xl font-semibold text-[#063b4c]">{currency.format(tariff.price)}</p>
+                <p className="mt-1 text-sm text-slate-500">{tariff.detail} · por día</p>
+              </div>
+            ))}
           </CardContent>
         </Card>
-
-        <Card className="shadow-sm border border-slate-100 hover:shadow-md transition-shadow duration-200">
-          <CardHeader className="flex flex-row items-center justify-between pb-2">
-            <CardTitle className="text-sm font-semibold text-slate-500 uppercase tracking-wider">
-              Estado Backend
-            </CardTitle>
-            <div className="rounded-full bg-green-50 p-2.5 text-green-600">
-              <Activity className="h-5 w-5" />
-            </div>
-          </CardHeader>
-          <CardContent>
-            <div className="text-3xl font-bold text-green-600">Operativo</div>
-            <p className="mt-1 text-xs text-slate-500">
-              API Gateway y microservicios online
-            </p>
-          </CardContent>
-        </Card>
-      </div>
-
-      {/* Main Grid: Quick Actions */}
-      <Card className="shadow-sm border border-slate-100 max-w-4xl mx-auto">
-        <CardHeader>
-          <CardTitle className="text-lg font-bold">Accesos Rápidos</CardTitle>
-          <CardDescription>Atajos a las vistas principales</CardDescription>
-        </CardHeader>
-        <CardContent className="grid gap-4 sm:grid-cols-3">
-          <Link href="/app/user" passHref className="w-full">
-            <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-blue-50 hover:text-blue-700 transition-colors">
-              <Users className="h-5 w-5 text-blue-500" />
-              Administrar Usuarios
-            </Button>
-          </Link>
-          <Link href="/app/role" passHref className="w-full">
-            <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-indigo-50 hover:text-indigo-700 transition-colors">
-              <Shield className="h-5 w-5 text-indigo-500" />
-              Ver Roles y Permisos
-            </Button>
-          </Link>
-          <Link href="/app/perfil" passHref className="w-full">
-            <Button variant="outline" className="w-full justify-start h-16 gap-3 hover:bg-slate-50 transition-colors">
-              <User className="h-5 w-5 text-slate-500" />
-              Configurar mi Perfil
-            </Button>
-          </Link>
-        </CardContent>
-      </Card>
+      </section>
     </div>
+  );
+}
+
+function Metric({ label, value, detail, tone, icon }: { label: string; value: number; detail: string; tone: string; icon: React.ReactNode }) {
+  return (
+    <Card>
+      <CardContent className="flex items-center gap-4 p-5">
+        <div className={`rounded-xl bg-slate-100 p-3 ${tone}`}>{icon}</div>
+        <div>
+          <p className="text-sm font-medium text-slate-500">{label}</p>
+          <p className={`text-3xl font-semibold ${tone}`}>{value}</p>
+          <p className="text-xs text-slate-500">{detail}</p>
+        </div>
+      </CardContent>
+    </Card>
   );
 }

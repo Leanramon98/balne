@@ -38,7 +38,67 @@ services:
           psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1 -f "$$migration"
         done
 
+  bookings-migrations:
+    image: postgres:16
+    restart: "no"
+    environment:
+      PGPASSWORD: postgres
+      PGOPTIONS: -c search_path=bookings_service,public
+    volumes:
+      - ../services/bookings-service/migrations:/migrations:ro
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - auto-insight-net
+    command:
+      - /bin/sh
+      - -ec
+      - |
+        set -eu
+        MAX_ATTEMPTS=30
+        RETRY_DELAY=2
+        attempt=1
+        until ready=$$(psql -h postgres -U postgres -d postgres -Atqc \
+          "SELECT to_regclass('users_service.\"user\"') IS NOT NULL" 2>/dev/null) \
+          && [ "$${ready}" = "t" ]; do
+          if [ "$${attempt}" -ge "$${MAX_ATTEMPTS}" ]; then
+            echo "PostgreSQL initialization not ready after $${MAX_ATTEMPTS} attempts" >&2
+            exit 1
+          fi
+          echo "Waiting for PostgreSQL initialization ($${attempt}/$${MAX_ATTEMPTS})" >&2
+          sleep "$${RETRY_DELAY}"
+          attempt=$$((attempt + 1))
+        done
+        set -- /migrations/*.up.sql
+        [ -f "$$1" ] || { echo "No bookings migrations found in /migrations" >&2; exit 1; }
+        for migration do
+          echo "Applying bookings migration: $$migration"
+          psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1 -f "$$migration"
+        done
+
   users-service:
     depends_on:
       tenant-migrations:
         condition: service_completed_successfully
+
+  bookings-service:
+    build:
+      context: ../services/bookings-service
+      dockerfile: Dockerfile
+    environment:
+      - PORT=8083
+      - DB_URL=postgres://postgres:postgres@postgres:5432/postgres?sslmode=disable&search_path=bookings_service
+    depends_on:
+      bookings-migrations:
+        condition: service_completed_successfully
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "wget", "--spider", "-q", "http://localhost:8083/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 10s
+    networks:
+      - auto-insight-net

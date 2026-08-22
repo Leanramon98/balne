@@ -13,12 +13,14 @@ interface Session {
   organization_id: string;
   membership_id: string;
   deployment_mode?: string;
+  is_local_demo?: boolean;
 }
 
 interface AuthContextType {
   user: User | null;
   session: Session | null;
   login: (email: string, password: string) => Promise<{ firstLogin: boolean }>;
+  loginLocalDemo: () => Promise<void>;
   logout: () => void;
   isAuthenticated: boolean;
 }
@@ -63,6 +65,14 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     return { firstLogin: data.first_login === true };
   }, []);
 
+  const loginLocalDemo = useCallback(async () => {
+    const res = await fetch('/api/auth/local-demo', { method: 'POST' });
+    if (!res.ok) throw new Error('Local demo login failed');
+    const data = await res.json();
+    setUser(data.user);
+    setSession(data.session);
+  }, []);
+
   const logout = useCallback(async () => {
     await fetch('/api/auth/logout', { method: 'POST' });
     setUser(null);
@@ -72,7 +82,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   }, []);
 
   return (
-    <AuthContext.Provider value={{ user, session, login, logout, isAuthenticated: !!user }}>
+    <AuthContext.Provider value={{ user, session, login, loginLocalDemo, logout, isAuthenticated: !!user }}>
       {!loading && children}
     </AuthContext.Provider>
   );

@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import type { NextRequest as NextRequestType } from 'next/server';
 import { locales, defaultLocale, cookieName } from '@/i18n/routing';
+import { isLocalDemoEnabled } from '@/lib/local-demo';
 
 const PUBLIC_ROUTES = [
   '/login',
@@ -61,8 +62,10 @@ export function middleware(request: NextRequestType) {
 
   // Check for auth token in httpOnly cookie
   const token = request.cookies.get('auto_insight_token')?.value;
+  const localDemoSession = isLocalDemoEnabled()
+    && request.cookies.get('balne_local_demo_session')?.value === '1';
 
-  if (!token) {
+  if (!token && !localDemoSession) {
     const loginUrl = new URL('/login', request.url);
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);

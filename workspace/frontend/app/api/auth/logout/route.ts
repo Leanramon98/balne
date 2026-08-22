@@ -20,6 +20,7 @@ export async function POST() {
   response.cookies.set('auto_insight_organization_id', '', cookieOptions);
   response.cookies.set('auto_insight_membership_id', '', cookieOptions);
   response.cookies.set('auto_insight_deployment_mode', '', cookieOptions);
+  response.cookies.set('balne_local_demo_session', '', cookieOptions);
 
   return response;
 }

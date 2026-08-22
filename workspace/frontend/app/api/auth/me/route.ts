@@ -1,4 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { localDemoSession } from '@/demo/balne-fixture';
+import { isLocalDemoEnabled } from '@/lib/local-demo';
 
 /**
  * Decode a JWT payload without verifying the signature.
@@ -15,6 +17,10 @@ function decodeJwtPayload(token: string): Record<string, unknown> | null {
 
 export async function GET(req: NextRequest) {
   const token = req.cookies.get('auto_insight_token')?.value;
+
+  if (!token && isLocalDemoEnabled() && req.cookies.get('balne_local_demo_session')?.value === '1') {
+    return NextResponse.json(localDemoSession);
+  }
 
   if (!token) {
     return NextResponse.json({ error: 'Not authenticated' }, { status: 401 });

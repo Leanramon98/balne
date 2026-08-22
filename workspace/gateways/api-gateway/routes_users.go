@@ -29,4 +29,8 @@ func RegisterUserRoutes(e *echo.Echo) {
 	// Session route — returns current session info (user + org + membership).
 	// Proxies to users-service which handles the session/me endpoint.
 	e.Add("GET", "/api/users/session/me", to("/session/me"), AuthMiddleware)
+
+	// Register bookings-service routes (user-owned, chained here because
+	// main_generated.go cannot be edited).
+	RegisterBookingsRoutes(e)
 }

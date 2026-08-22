@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import { useTranslations } from 'next-intl';
@@ -15,7 +16,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Mail, Lock, Compass, Users, Target, Globe, Eye, EyeOff } from 'lucide-react';
+import { Mail, Lock, Globe, Eye, EyeOff } from 'lucide-react';
 
 const LOCALES = ['es', 'pt'] as const;
 
@@ -29,12 +30,6 @@ function setLocaleCookie(locale: string): void {
   document.cookie = `NEXT_LOCALE=${locale}; path=/; max-age=${365 * 24 * 60 * 60}; SameSite=Lax`;
 }
 
-const features = [
-  { icon: Compass, titleKey: 'page.login.feature-autodiagnostico', descKey: 'page.login.feature-autodiagnostico-desc' },
-  { icon: Users, titleKey: 'page.login.feature-colaborativa', descKey: 'page.login.feature-colaborativa-desc' },
-  { icon: Target, titleKey: 'page.login.feature-plan', descKey: 'page.login.feature-plan-desc' },
-];
-
 export default function LoginPage() {
   const t = useTranslations();
   const [email, setEmail] = useState('');
@@ -44,7 +39,9 @@ export default function LoginPage() {
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
   const router = useRouter();
-  const { login } = useAuth();
+  const { login, loginLocalDemo } = useAuth();
+  const localDemoEnabled = process.env.NEXT_PUBLIC_BALNE_LOCAL_DEMO_LOGIN === 'true'
+    && process.env.NODE_ENV === 'development';
 
   const currentLocale = getLocaleFromCookie();
 
@@ -69,6 +66,11 @@ export default function LoginPage() {
     setError('');
     setIsLoading(true);
     try {
+      if (localDemoEnabled && !email.trim() && !password) {
+        await loginLocalDemo();
+        router.push('/app');
+        return;
+      }
       const result = await login(email, password);
       if (result.firstLogin) {
         router.push('/cambiar-contrasena');
@@ -90,98 +92,63 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex relative">
-      {/* Language switch — top right */}
-      <div className="absolute top-4 right-4 z-20">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#fffaf0] px-5 py-5 text-[#174d4b] sm:px-8 sm:py-8 lg:px-12 lg:py-10">
+      <div className="absolute -left-24 top-24 size-64 rounded-full bg-[#ffe17b]/70" aria-hidden="true" />
+      <div className="absolute -bottom-28 right-[28%] size-72 rounded-full bg-[#d8f0e3]" aria-hidden="true" />
+
+      <div className="absolute right-5 top-5 z-20 sm:right-8 sm:top-8 lg:right-12 lg:top-10">
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button
               variant="outline"
               size="sm"
-              className="flex items-center gap-2 rounded-lg border-zinc-200 bg-white/80 backdrop-blur-sm"
+              className="flex items-center gap-2 rounded-full border-[#174d4b]/20 bg-[#fffaf0]/90 px-4 text-[#174d4b] shadow-[0_4px_0_rgba(23,77,75,0.1)] backdrop-blur-sm hover:bg-[#ffe8a1]"
             >
               <Globe className="h-4 w-4" />
               <span className="text-xs font-medium">{currentLocale === 'pt' ? 'Português' : 'Español'}</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="p-1 min-w-[140px]">
+          <DropdownMenuContent align="end" className="min-w-[140px] rounded-2xl border-[#174d4b]/15 bg-[#fffaf0] p-1 text-[#174d4b] shadow-[0_16px_35px_rgba(14,53,53,0.16)]">
             {LOCALES.map((locale) => (
               <DropdownMenuItem
                 key={locale}
                 onClick={() => handleLocaleChange(locale)}
                 className={`cursor-pointer px-3 py-2.5 ${
-                  currentLocale === locale ? 'bg-blue-50 font-semibold text-blue-700' : ''
+                  currentLocale === locale ? 'bg-[#ffe8a1] font-semibold text-[#174d4b]' : ''
                 }`}
               >
                 {t(locale === 'es' ? 'page.login.espanol' : 'page.login.portugues')}
-                {currentLocale === locale && <span className="ml-auto text-blue-600 text-xs">✓</span>}
+                {currentLocale === locale && <span className="ml-auto text-[#f0512d] text-xs">✓</span>}
               </DropdownMenuItem>
             ))}
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      {/* Left panel */}
-      <div className="hidden lg:flex lg:w-[42%] xl:w-[40%] flex-col justify-between bg-[#040927] text-white relative overflow-hidden">
-        {/* Decorative circles */}
-        <div className="absolute -top-32 -right-32 w-[400px] h-[400px] rounded-full bg-white/5" />
-        <div className="absolute -bottom-40 -left-40 w-[500px] h-[500px] rounded-full bg-white/5" />
-
-        <div className="relative z-10 px-10 pt-10">
-          <div className="flex items-center gap-2 font-semibold text-xl text-white">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-blue-600 text-white text-base font-bold">
-              P
-            </div>
-            <span>Platform</span>
-          </div>
-        </div>
-
-        <div className="relative z-10 px-10 flex-1 flex flex-col justify-center">
-          <h2 className="text-4xl xl:text-5xl font-bold leading-[1.1] mb-6 text-white">
-            {t('page.login.hero-title')}
-          </h2>
-          <p className="text-base leading-relaxed mb-12 text-white/80">
-            {t('page.login.hero-desc')}
-          </p>
-
-          <div className="space-y-6 pl-2">
-            {features.map((f) => (
-              <div key={f.titleKey} className="flex items-start gap-4">
-                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-white/10">
-                  <f.icon className="h-5 w-5 text-white" />
-                </div>
-                <div>
-                  <p className="text-base font-semibold text-white">{t(f.titleKey)}</p>
-                  <p className="text-sm text-white/70">{t(f.descKey)}</p>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
-      </div>
-
-      {/* Right panel */}
-      <div className="flex-1 flex items-center justify-center bg-[#fafafa] px-6">
+      <section className="relative z-10 flex w-full items-center justify-center py-16 lg:py-0">
         <form
           onSubmit={handleSubmit}
-          className="w-full max-w-md space-y-5 rounded-3xl border border-zinc-200 bg-white p-8 shadow-[0_24px_70px_rgba(4,9,39,0.08)]"
+          className="w-full max-w-md space-y-5 rounded-[2rem] border border-[#d9d1c3] bg-[#fffaf0] p-6 shadow-[0_18px_0_#edc889] sm:p-9"
         >
-          <div className="lg:hidden flex items-center justify-center gap-2 font-semibold text-lg text-zinc-900 mb-6">
-            <div className="flex h-8 w-8 items-center justify-center rounded-md bg-blue-600 text-white text-sm font-bold">
-              P
-            </div>
-            <span>Platform</span>
-          </div>
+          <Image
+            src="/brand/balne-logo.png"
+            alt="Balne"
+            width={3713}
+            height={911}
+            priority
+            className="h-auto w-36 rounded-lg bg-[#fffaf0] p-1"
+          />
 
           <div>
-            <h1 className="text-3xl font-bold tracking-tight text-zinc-900">{t('page.login.title')}</h1>
-            <p className="mt-2 text-sm leading-6 text-zinc-500">{t('page.login.subtitle')}</p>
+            <p className="text-xs font-black uppercase tracking-[0.2em] text-[#dc4829]">Balne</p>
+            <h1 className="mt-3 font-serif text-4xl font-black leading-none tracking-[-0.045em] text-[#174d4b]">{t('page.login.title')}</h1>
+            <p className="mt-3 text-sm leading-6 text-[#586663]">{t('page.login.subtitle')}</p>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email" className="text-sm font-semibold text-zinc-700">{t('page.login.email-label')}</Label>
+            <Label htmlFor="email" className="text-sm font-bold text-[#174d4b]">{t('page.login.email-label')}</Label>
             <div className="relative">
-              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Mail className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6c7068]" aria-hidden="true" />
               <Input
                 id="email"
                 type="email"
@@ -189,16 +156,16 @@ export default function LoginPage() {
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 placeholder={t('page.login.email-placeholder')}
-                className="h-11 rounded-xl border-zinc-200 bg-zinc-50/60 pl-10 shadow-sm transition-colors focus-visible:bg-white focus-visible:ring-[#040927]"
-                required
+                className="h-12 rounded-2xl border-[#d9d1c3] bg-white pl-10 shadow-sm transition-colors focus-visible:border-[#174d4b] focus-visible:ring-[#174d4b]"
+                required={!localDemoEnabled}
               />
             </div>
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="password" className="text-sm font-semibold text-zinc-700">{t('page.login.password-label')}</Label>
+            <Label htmlFor="password" className="text-sm font-bold text-[#174d4b]">{t('page.login.password-label')}</Label>
             <div className="relative">
-              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-400" />
+              <Lock className="absolute left-3.5 top-1/2 h-4 w-4 -translate-y-1/2 text-[#6c7068]" aria-hidden="true" />
               <Input
                 id="password"
                 type={showPassword ? 'text' : 'password'}
@@ -206,16 +173,16 @@ export default function LoginPage() {
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 placeholder="••••••••"
-                className="h-11 rounded-xl border-zinc-200 bg-zinc-50/60 pl-10 pr-10 shadow-sm transition-colors focus-visible:bg-white focus-visible:ring-[#040927]"
-                required
+                className="h-12 rounded-2xl border-[#d9d1c3] bg-white pl-10 pr-10 shadow-sm transition-colors focus-visible:border-[#174d4b] focus-visible:ring-[#174d4b]"
+                required={!localDemoEnabled}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword((prev) => !prev)}
-                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-600"
-                tabIndex={-1}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 rounded-md text-[#6c7068] hover:text-[#174d4b] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#174d4b]"
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
               >
-                {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+                {showPassword ? <EyeOff className="h-4 w-4" aria-hidden="true" /> : <Eye className="h-4 w-4" aria-hidden="true" />}
               </button>
             </div>
           </div>
@@ -226,27 +193,33 @@ export default function LoginPage() {
                 id="remember"
                 checked={remember}
                 onCheckedChange={(checked) => setRemember(checked === true)}
-                className="border-zinc-300 data-[state=checked]:border-[#040927] data-[state=checked]:bg-[#040927]"
+                className="border-[#8aa6a0] data-[state=checked]:border-[#174d4b] data-[state=checked]:bg-[#174d4b]"
               />
-              <Label htmlFor="remember" className="text-sm text-zinc-600 font-normal cursor-pointer">
+              <Label htmlFor="remember" className="cursor-pointer text-sm font-normal text-[#586663]">
                 {t('page.login.remember')}
               </Label>
             </div>
-            <Link href="/recuperar" className="text-sm font-medium text-[#040927] hover:underline">
+            <Link href="/recuperar" className="text-sm font-bold text-[#174d4b] underline decoration-[#f0512d] decoration-2 underline-offset-4 hover:text-[#f0512d] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#174d4b]">
               {t('page.login.forgot-password')}
             </Link>
           </div>
 
           {error && (
-            <p className="rounded-xl border border-red-100 bg-red-50 px-3 py-2 text-center text-sm text-red-600">
+            <p className="rounded-2xl border border-red-200 bg-red-50 px-3 py-2 text-center text-sm text-red-700">
               {error}
+            </p>
+          )}
+
+          {localDemoEnabled && (
+            <p className="rounded-2xl border border-[#edc889] bg-[#fff4ca] px-3 py-2 text-center text-sm text-[#6f4c18]">
+              DEMO LOCAL: dejá ambos campos vacíos para entrar con datos de muestra. No habilita acceso real.
             </p>
           )}
 
           <Button
             type="submit"
             disabled={isLoading}
-            className="relative h-11 w-full overflow-hidden rounded-xl bg-[#040927] font-semibold text-white shadow-lg shadow-[#040927]/20 hover:bg-[#101a4a] disabled:opacity-80"
+            className="relative h-12 w-full overflow-hidden rounded-full bg-[#f0512d] font-black text-white shadow-[0_5px_0_#b9341e] transition hover:-translate-y-0.5 hover:bg-[#ff5b36] focus-visible:ring-[#174d4b] disabled:translate-y-0 disabled:opacity-80"
           >
             {isLoading && (
               <>
@@ -271,9 +244,12 @@ export default function LoginPage() {
               50% { width: 100%; left: 0; }
               100% { width: 0%; left: 100%; }
             }
+            @media (prefers-reduced-motion: reduce) {
+              .animate-spin, .animate-\\[loading-bar_1\\.5s_ease-in-out_infinite\\] { animation: none !important; }
+            }
           `}</style>
         </form>
-      </div>
-    </div>
+      </section>
+    </main>
   );
 }
