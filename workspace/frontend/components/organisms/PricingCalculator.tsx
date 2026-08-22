@@ -20,22 +20,24 @@ function formatPesos(amount: number): string {
 function formatDays(days: number): string {
   if (days === 1) return '1 día';
   if (days === 0.5) return '0,5 días';
+  if (days === 1.5) return '1,5 días';
+  if (days === 2.5) return '2,5 días';
   const str = days % 1 === 0 ? days.toString() : days.toLocaleString('es-AR');
   return `${str} días`;
 }
 
-// Calculate days per installment for Enero & Febrero
+// Calculate days per installment for Enero & Febrero (una cuota por mes, 2 cuotas en total)
 function getDiasEneFeb(units: number): number {
-  if (units < 50) return 1;
-  if (units <= 100) return 2;
-  if (units <= 150) return 3;
-  if (units <= 200) return 4;
-  return 5; // 201 o más
+  if (units < 50) return 0.5;   // 1 día total de verano
+  if (units <= 100) return 1.5;  // 3 días total de verano (ej: 100 carpas @ $100k = 2 cuotas de $150k)
+  if (units <= 150) return 2.0;  // 4 días total de verano
+  if (units <= 200) return 2.5;  // 5 días total de verano
+  return 3.0;                    // 6 días total de verano (201 o más)
 }
 
-// Calculate days per installment for Septiembre a Diciembre
+// Calculate days per installment for Septiembre a Diciembre (4 cuotas en total)
 function getDiasSepDic(units: number): number {
-  return units <= 150 ? 0.5 : 1;
+  return units <= 150 ? 0.5 : 1.0;
 }
 
 export function PricingCalculator() {
