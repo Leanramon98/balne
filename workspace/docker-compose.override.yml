@@ -77,7 +77,15 @@ services:
           psql -h postgres -U postgres -d postgres -v ON_ERROR_STOP=1 -f "$$migration"
         done
 
+  # Publish the gateway on loopback only: the frontend (systemd, host) reaches
+  # it at 127.0.0.1:8080, but it is NOT exposed to the public internet.
+  api-gateway:
+    ports: !override
+      - "127.0.0.1:8080:8080"
+
   users-service:
+    environment:
+      - FRONTEND_URL=https://balne.com.ar
     depends_on:
       tenant-migrations:
         condition: service_completed_successfully

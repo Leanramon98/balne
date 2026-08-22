@@ -21,7 +21,8 @@ Desktop.ini
 *.test
 *.out
 /bin/
-api-gateway
+# Compiled gateway binary only — NOT the source directory
+workspace/gateways/api-gateway/api-gateway
 workspace/backend/platform
 vendor/
 workspace/services/**/null
