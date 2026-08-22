@@ -241,6 +241,17 @@ export async function getBalnearioPlan(id: string): Promise<BookingsPlanUnit[]> 
   return request<BookingsPlanUnit[]>('GET', `/balnearios/${encodeURIComponent(id)}/plan`);
 }
 
+export async function saveBalnearioPlan(
+  balnearioId: string,
+  units: Partial<BookingsPlanUnit>[],
+): Promise<BookingsPlanUnit[]> {
+  return request<BookingsPlanUnit[]>(
+    'PUT',
+    `/balnearios/${encodeURIComponent(balnearioId)}/plan`,
+    { units },
+  );
+}
+
 export async function createInternalReservation(
   data: InternalReservationInput,
 ): Promise<BookingsReservation> {

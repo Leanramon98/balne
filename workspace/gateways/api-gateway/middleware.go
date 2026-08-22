@@ -80,6 +80,7 @@ func AuthMiddleware(next echo.HandlerFunc) echo.HandlerFunc {
 		c.Set("dep_mode", claims.DeploymentMode)
 
 		c.Request().Header.Set("X-Organization-ID", claims.OrganizationID)
+		c.Request().Header.Set("X-Tenant-ID", claims.OrganizationID)
 		c.Request().Header.Set("X-Membership-ID", claims.MembershipID)
 		c.Request().Header.Set("X-Deployment-Mode", claims.DeploymentMode)
 

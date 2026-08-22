@@ -28,6 +28,7 @@ func RegisterBookingsRoutes(e *echo.Echo) {
 	e.Add("GET", "/api/bookings/balnearios", to("/balnearios"), AuthMiddleware)
 	e.Add("POST", "/api/bookings/balnearios", to("/balnearios"), AuthMiddleware)
 	e.Add("GET", "/api/bookings/balnearios/:id/plan", to("/balnearios/:id/plan"), AuthMiddleware)
+	e.Add("PUT", "/api/bookings/balnearios/:id/plan", to("/balnearios/:id/plan"), AuthMiddleware)
 
 	// Plan unit management
 	e.Add("PUT", "/api/bookings/plan-units/:id", to("/plan-units/:id"), AuthMiddleware)

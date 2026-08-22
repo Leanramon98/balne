@@ -40,6 +40,7 @@ func (h *Handler) registerRoutes(e *echo.Group) {
 	e.GET("/balnearios", h.handleListBalnearios)
 	e.POST("/balnearios", h.handleCreateBalneario)
 	e.GET("/balnearios/:id/plan", h.handleGetPlan)
+	e.PUT("/balnearios/:id/plan", h.handleSavePlan)
 	e.PUT("/plan-units/:id", h.handleUpdatePlanUnit)
 	e.POST("/reservations", h.handleCreateReservation)
 	e.GET("/reservations", h.handleListReservations)
@@ -217,6 +218,30 @@ func (h *Handler) handleGetPlan(c echo.Context) error {
 		return httpError(err)
 	}
 	return c.JSON(http.StatusOK, units)
+}
+
+func (h *Handler) handleSavePlan(c echo.Context) error {
+	id, err := uuid.Parse(c.Param("id"))
+	if err != nil {
+		return echo.NewHTTPError(http.StatusBadRequest, "invalid balneario id")
+	}
+	var req struct {
+		Units []*domain.PlanUnit `json:"units"`
+	}
+	if err := c.Bind(&req); err != nil {
+		// Allow direct array payload or wrapped { "units": [...] }
+		var units []*domain.PlanUnit
+		if errArray := c.Bind(&units); errArray == nil {
+			req.Units = units
+		} else {
+			return echo.NewHTTPError(http.StatusBadRequest, err.Error())
+		}
+	}
+	updated, err := h.uc.SavePlan(c.Request().Context(), id, req.Units)
+	if err != nil {
+		return httpError(err)
+	}
+	return c.JSON(http.StatusOK, updated)
 }
 
 func (h *Handler) handleUpdatePlanUnit(c echo.Context) error {

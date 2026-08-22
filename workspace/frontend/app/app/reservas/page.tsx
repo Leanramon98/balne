@@ -4,7 +4,7 @@ import { FormEvent, useEffect, useMemo, useState } from 'react';
 import { CheckCircle2, CircleDot, Clock3, MapPin, Users, Waves } from 'lucide-react';
 import { localDemoBalneario, type DemoUnit, type DemoUnitStatus } from '@/demo/balne-fixture';
 import { useBalneario, usePlanUnits } from '@/sdk/hooks/use-bookings';
-import { createCustomer, createInternalReservation, type BookingsPlanUnit } from '@/sdk/api/bookings-api';
+import { createCustomer, createInternalReservation, listReservations, updateReservationStatus, type BookingsPlanUnit, type BookingsReservation, type ReservationStatus } from '@/sdk/api/bookings-api';
 import { getDraftPlan, getDraftSlugs, saveDraftPlan } from '@/lib/draft-plan';
 import { balnearioPlans } from '@/demo/plans';
 import type { PlanUnit } from '@/demo/plans/model';

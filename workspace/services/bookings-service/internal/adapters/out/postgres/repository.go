@@ -132,6 +132,83 @@ func (r *Repo) UpdatePlanUnit(ctx context.Context, u *domain.PlanUnit) error {
 	return err
 }
 
+func (r *Repo) SavePlanUnits(ctx context.Context, balnearioID uuid.UUID, units []*domain.PlanUnit) error {
+	tx, err := r.db.BeginTx(ctx, nil)
+	if err != nil {
+		return err
+	}
+	defer tx.Rollback()
+
+	keepIDs := make([]uuid.UUID, 0, len(units))
+	for _, u := range units {
+		if u.ID == uuid.Nil {
+			u.ID = uuid.New()
+		}
+		u.BalnearioID = balnearioID
+		keepIDs = append(keepIDs, u.ID)
+
+		if u.Shape == "" {
+			u.Shape = "rectangle"
+		}
+		if u.Status == "" {
+			u.Status = "available"
+		}
+
+		_, err := tx.ExecContext(ctx, `
+			INSERT INTO plan_units (
+				id, balneario_id, unit_number, zone, capacity,
+				position_x, position_y, width, height, shape, is_rentable, status
+			)
+			VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12)
+			ON CONFLICT (id) DO UPDATE SET
+				unit_number = EXCLUDED.unit_number,
+				zone = EXCLUDED.zone,
+				capacity = EXCLUDED.capacity,
+				position_x = EXCLUDED.position_x,
+				position_y = EXCLUDED.position_y,
+				width = EXCLUDED.width,
+				height = EXCLUDED.height,
+				shape = EXCLUDED.shape,
+				is_rentable = EXCLUDED.is_rentable,
+				status = EXCLUDED.status;
+		`, u.ID, u.BalnearioID, u.UnitNumber, u.Zone, u.Capacity,
+			u.PositionX, u.PositionY, u.Width, u.Height, u.Shape, u.IsRentable, u.Status)
+		if err != nil {
+			return err
+		}
+	}
+
+	if len(keepIDs) > 0 {
+		_, err = tx.ExecContext(ctx, `
+			DELETE FROM plan_units
+			WHERE balneario_id = $1 AND id NOT IN (
+				SELECT unnest($2::uuid[])
+			)
+		`, balnearioID, fmt.Sprintf("{%s}", joinUUIDs(keepIDs)))
+		if err != nil {
+			return err
+		}
+	} else {
+		_, err = tx.ExecContext(ctx, `DELETE FROM plan_units WHERE balneario_id = $1`, balnearioID)
+		if err != nil {
+			return err
+		}
+	}
+
+	return tx.Commit()
+}
+
+func joinUUIDs(ids []uuid.UUID) string {
+	var s string
+	for i, id := range ids {
+		if i > 0 {
+			s += ","
+		}
+		s += id.String()
+	}
+	return s
+}
+
 func scanPlanUnit(scanner interface{ Scan(dest ...interface{}) error }) (*domain.PlanUnit, error) {
 	var u domain.PlanUnit
 	if err := scanner.Scan(

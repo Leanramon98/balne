@@ -20,6 +20,7 @@ type BookingsUseCase interface {
 	GetBalnearioBySlug(ctx context.Context, slug string) (*domain.Balneario, error)
 	ListBalnearios(ctx context.Context) ([]*domain.Balneario, error)
 	GetPlan(ctx context.Context, balnearioID uuid.UUID) ([]*domain.PlanUnit, error)
+	SavePlan(ctx context.Context, balnearioID uuid.UUID, units []*domain.PlanUnit) ([]*domain.PlanUnit, error)
 
 	// Plan units
 	UpdatePlanUnit(ctx context.Context, u *domain.PlanUnit) error

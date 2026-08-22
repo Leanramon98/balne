@@ -114,6 +114,20 @@ func (l *Logic) GetPlan(ctx context.Context, balnearioID uuid.UUID) ([]*domain.P
 	return l.repo.GetPlanUnitsByBalneario(ctx, balnearioID)
 }
 
+func (l *Logic) SavePlan(ctx context.Context, balnearioID uuid.UUID, units []*domain.PlanUnit) ([]*domain.PlanUnit, error) {
+	b, err := l.repo.GetBalnearioByID(ctx, balnearioID)
+	if err != nil {
+		return nil, err
+	}
+	if b == nil {
+		return nil, ErrBalnearioNotFound
+	}
+	if err := l.repo.SavePlanUnits(ctx, balnearioID, units); err != nil {
+		return nil, err
+	}
+	return l.repo.GetPlanUnitsByBalneario(ctx, balnearioID)
+}
+
 // ---------------- Plan units ----------------
 
 func (l *Logic) UpdatePlanUnit(ctx context.Context, u *domain.PlanUnit) error {

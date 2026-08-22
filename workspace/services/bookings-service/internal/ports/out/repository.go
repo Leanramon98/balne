@@ -24,6 +24,7 @@ type Repository interface {
 	GetPlanUnitsByBalneario(ctx context.Context, balnearioID uuid.UUID) ([]*domain.PlanUnit, error)
 	GetPlanUnitByID(ctx context.Context, id uuid.UUID) (*domain.PlanUnit, error)
 	UpdatePlanUnit(ctx context.Context, u *domain.PlanUnit) error
+	SavePlanUnits(ctx context.Context, balnearioID uuid.UUID, units []*domain.PlanUnit) error
 
 	// Tariffs
 	ListTariffsByBalneario(ctx context.Context, balnearioID uuid.UUID) ([]*domain.Tariff, error)

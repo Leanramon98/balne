@@ -10,6 +10,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { draftKey, saveDraftPlan } from '@/lib/draft-plan';
+import { getBalnearioBySlug, saveBalnearioPlan, type BookingsPlanUnit } from '@/sdk/api/bookings-api';
 
 type Tool = 'select' | 'carpa-simple' | 'carpa-doble' | 'sombrilla' | 'pasillo' | 'servicio' | 'texto';
 type Selected = { type: 'landmark' | 'unit'; id: string } | null;
@@ -240,7 +241,7 @@ export function PlanEditor() {
     window.addEventListener('pointerup', stop);
   }
 
-  function save() {
+  async function save() {
     const cleanSlug = slug.trim();
     if (!cleanSlug) return;
 
@@ -254,6 +255,27 @@ export function PlanEditor() {
 
     setPlan(planToSave);
     saveDraftPlan(cleanSlug, planToSave);
+
+    try {
+      const bData = await getBalnearioBySlug(cleanSlug);
+      if (bData && bData.id) {
+        const apiUnits: Partial<BookingsPlanUnit>[] = planToSave.units.map((u) => ({
+          unit_number: String(u.number),
+          zone: u.zoneId || 'general',
+          capacity: u.capacity,
+          position_x: u.geometry.kind === 'circle' ? u.geometry.cx : u.geometry.kind === 'rect' ? u.geometry.x : 0,
+          position_y: u.geometry.kind === 'circle' ? u.geometry.cy : u.geometry.kind === 'rect' ? u.geometry.y : 0,
+          width: u.geometry.kind === 'rect' ? u.geometry.width : (u.geometry.kind === 'circle' ? u.geometry.r * 2 : 40),
+          height: u.geometry.kind === 'rect' ? u.geometry.height : (u.geometry.kind === 'circle' ? u.geometry.r * 2 : 40),
+          shape: u.geometry.kind === 'circle' ? 'circle' : 'rectangle',
+          is_rentable: true,
+          status: u.status,
+        }));
+        await saveBalnearioPlan(bData.id, apiUnits);
+      }
+    } catch (err) {
+      console.warn('Backend sync failed, saved locally:', err);
+    }
 
     if (typeof window !== 'undefined') {
       window.dispatchEvent(new CustomEvent('balne-plan-updated', { detail: { slug: cleanSlug } }));
