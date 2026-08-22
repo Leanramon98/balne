@@ -23,6 +23,19 @@ const AUTH_ONLY_ROUTES = [
   '/api/auth/complete-onboarding',
 ];
 
+// Build an absolute URL for redirects that survives reverse-proxy deployments.
+// The standalone Next.js server derives request.url from its own HOSTNAME/PORT
+// env (e.g. http://localhost:3000) and ignores the Host header, so redirects
+// built from request.url would send users to the proxy's internal origin.
+// nginx sets X-Forwarded-Host to the canonical host (client-supplied values
+// are overwritten), so it is trusted when present.
+function redirectUrl(request: NextRequestType, pathname: string): URL {
+  const host = request.headers.get('x-forwarded-host') || request.headers.get('host');
+  const proto = request.headers.get('x-forwarded-proto') || 'http';
+  const origin = host ? `${proto}://${host}` : request.url;
+  return new URL(pathname, origin);
+}
+
 export function middleware(request: NextRequestType) {
   const { pathname } = request.nextUrl;
 
@@ -66,7 +79,7 @@ export function middleware(request: NextRequestType) {
     && request.cookies.get('balne_local_demo_session')?.value === '1';
 
   if (!token && !localDemoSession) {
-    const loginUrl = new URL('/login', request.url);
+    const loginUrl = redirectUrl(request, '/login');
     loginUrl.searchParams.set('redirect', pathname);
     return NextResponse.redirect(loginUrl);
   }
@@ -83,7 +96,7 @@ export function middleware(request: NextRequestType) {
   // to the onboarding form before the user can access any app page.
   const firstLogin = request.cookies.get('auto_insight_first_login')?.value;
   if (firstLogin === '1') {
-    return NextResponse.redirect(new URL('/cambiar-contrasena', request.url));
+    return NextResponse.redirect(redirectUrl(request, '/cambiar-contrasena'));
   }
 
   // Authenticated request: set locale header and continue
